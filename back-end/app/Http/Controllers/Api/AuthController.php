@@ -3,19 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Traits\ApiResponsesTrait;
+use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    use ApiResponsesTrait;
+    use ApiResponses;
 
-    public function login(Request $request) {
-        $credentials = $request->only('email', 'request');
+    public function login(Request $request)
+    {
+        $data = $request->only('email', 'password');
 
-        $token = auth()->attempt($credentials);
+        $token = Auth::attempt($data);
 
-        if(!$token){    
+        if (!$token) {
             return $this->unauthorizedResponse([], 'Invalid credentials');
         }
 
@@ -28,4 +30,10 @@ class AuthController extends Controller
     }
 
 
+    public function logout()
+    {
+        Auth::logout();
+        return $this->okResponse([], 'Successfully logged out');
+    }
+    
 }

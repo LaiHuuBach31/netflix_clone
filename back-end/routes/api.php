@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GenreController;
+use App\Http\Controllers\Api\GenresController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +17,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group([
+    'namespace' => 'api'
+], function () {
+
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
+
+    Route::group(['prefix' => 'genres', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [GenreController::class, 'index']);
+        Route::get('/{id}', [GenreController::class, 'show']);
+        Route::post('/', [GenreController::class, 'store']);
+        Route::put('/{id}', [GenreController::class, 'update']);
+        Route::delete('/{id}', [GenreController::class, 'destroy']);
+    });
 });

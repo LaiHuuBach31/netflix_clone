@@ -2,11 +2,18 @@
 
 namespace App\Exceptions;
 
+use App\Traits\ApiResponses;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+
+    use ApiResponses;
+
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -43,8 +50,38 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->reportable(function (Throwable $e) {
-            //
+
+        $this->renderable(function (ResourceNotFoundException $e, $request) {
+            return $this->notFoundResponse([], $e->getMessage());
         });
+
+        $this->renderable(function (CreationFailedException  $e, $request) {
+            return $this->unprocessableResponse([], $e->getMessage());
+        });
+
+        $this->renderable(function (UpdateFailedException $e, $request) {
+            return $this->unprocessableResponse([], $e->getMessage());
+        });
+
+        $this->renderable(function (DeletionFailedException $e, $request) {
+            return $this->unprocessableResponse([], $e->getMessage());
+        });
+
+        $this->renderable(function (ModelNotFoundException $e, $request) {
+            return $this->notFoundResponse([], 'Resource not found');
+        });
+
+        $this->renderable(function (Throwable $e, $request) {
+            return $this->errorResponse([], 'An unexpected error occurred: ' . $e->getMessage());
+        });
+
+        $this->renderable(function (AuthenticationException $e, $request) {
+            return $this->unauthorizedResponse([], 'Unauthenticated');
+        });
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return $this->unauthorizedResponse([], 'Unauthorized');
     }
 }
