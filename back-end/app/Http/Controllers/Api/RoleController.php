@@ -2,35 +2,35 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Services\RoleService;
 use Illuminate\Http\Request;
-use App\Services\GenreService;
 use Illuminate\Validation\ValidationException;
 
-class GenreController extends BaseController
+class RoleController extends BaseController
 {
-    protected $genreService;
+    protected $roleService;
 
-    public function __construct(GenreService $genreService)
+    public function __construct(RoleService $roleService)
     {
-        $this->genreService = $genreService;
+        $this->roleService = $roleService;
     }
 
     public function index()
     {
-        return $this->handleIndex($this->genreService);
+        return $this->handleIndex($this->roleService);
     }
 
     public function show(int $id)
     {
-        return $this->handleShow($this->genreService, $id);
+        return $this->handleShow($this->roleService, $id);
     }
 
     public function store(Request $request)
     {
         $data = $request->all();
         try {
-            $genre = $this->genreService->createGenre($data);
-            return $this->createdResponse($genre, 'Genre created successfully');
+            $role = $this->roleService->createRole($data);
+            return $this->createdResponse($role, 'Role created successfully');
         } catch (ValidationException $e) {
             return $this->handleValidationException($e);
         }
@@ -40,8 +40,8 @@ class GenreController extends BaseController
     {
         $data = $request->all();
         try {
-            $genre = $this->genreService->updateGenre($id, $data);
-            return $this->okResponse($genre, 'Genre updated successfully');
+            $role = $this->roleService->updateRole($id, $data);
+            return $this->okResponse($role, 'Role updated successfully');
         } catch (ValidationException $e) {
             return $this->handleValidationException($e);
         }
@@ -49,6 +49,6 @@ class GenreController extends BaseController
 
     public function destroy(int $id)
     {
-        return $this->handleDelete($this->genreService, $id, 'Genre');
+        return $this->handleDelete($this->roleService, $id, 'Role');
     }
 }

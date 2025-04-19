@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GenreController;
 use App\Http\Controllers\Api\GenresController;
+use App\Http\Controllers\Api\RoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,4 +33,14 @@ Route::group([
         Route::put('/{id}', [GenreController::class, 'update']);
         Route::delete('/{id}', [GenreController::class, 'destroy']);
     });
+
+    Route::group(['prefix' => 'roles', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::get('/{id}', [RoleController::class, 'show']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::put('/{id}', [RoleController::class, 'update']);
+        Route::delete('/{id}', [RoleController::class, 'destroy']);
+    });
+
+
 });

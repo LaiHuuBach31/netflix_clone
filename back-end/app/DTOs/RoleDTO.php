@@ -1,11 +1,10 @@
 <?php
-
 namespace App\DTOs;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class GenreDTO extends BaseDTO {
+class RoleDTO extends BaseDTO{
 
     public function __construct(array $data, bool $validate = false) {
 

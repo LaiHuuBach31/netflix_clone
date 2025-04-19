@@ -15,7 +15,8 @@ class GenreService extends BaseService
     public function getAll()
     {
         $genres = parent::getAll();
-        return $genres->map(fn($genre) => GenreMapper::fromModel($genre))->toArray();
+        return $genres->map(fn($genre) => GenreMapper::fromModel($genre));
+
     }
 
     public function findById(int $id)
@@ -26,16 +27,16 @@ class GenreService extends BaseService
 
     public function createGenre(array $data)
     {
-        $dto = new GenreDTO($data);
+        $dto = new GenreDTO($data, true);
         $created = parent::create($dto);
-        return GenreMapper::fromModel($created)->toArray();
+        return GenreMapper::fromModel($created);
     }
 
     public function updateGenre(int $id, array $data)
     {
-        $dto = new GenreDTO($data);
+        $dto = new GenreDTO($data, true);
         $updated = parent::update($id, $dto);
-        return GenreMapper::fromModel($updated)->toArray();
+        return GenreMapper::fromModel($updated);
     }
 }
 
