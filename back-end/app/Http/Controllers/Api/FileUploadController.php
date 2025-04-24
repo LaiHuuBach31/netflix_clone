@@ -29,7 +29,7 @@ class FileUploadController extends Controller
                 'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
-            if ($validator->failed()) {
+            if ($validator->fails()) {
                 throw new ValidationException($validator);
             }
 
