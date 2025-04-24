@@ -2,35 +2,35 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Services\RoleService;
+use App\Http\Controllers\Controller;
+use App\Services\PlanService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class RoleController extends BaseController
+class PlanController extends BaseController
 {
-    protected $roleService;
+    protected $planService;
 
-    public function __construct(RoleService $roleService)
-    {
-        $this->roleService = $roleService;
+    public function __construct(PlanService $planService) {
+        $this->planService = $planService;
     }
 
     public function index()
     {
-        return $this->handleIndex($this->roleService);
+        return $this->handleIndex($this->planService);
     }
 
     public function show(int $id)
     {
-        return $this->handleShow($this->roleService, $id);
+        return $this->handleShow($this->planService, $id);
     }
 
     public function store(Request $request)
     {
         $data = $request->all();
         try {
-            $role = $this->roleService->createRole($data);
-            return $this->createdResponse($role, 'Role created successfully');
+            $role = $this->planService->createPlan($data);
+            return $this->createdResponse($role, 'Plan created successfully');
         } catch (ValidationException $e) {
             return $this->handleValidationException($e);
         }
@@ -40,8 +40,8 @@ class RoleController extends BaseController
     {
         $data = $request->all();
         try {
-            $role = $this->roleService->updateRole($id, $data);
-            return $this->okResponse($role, 'Role updated successfully');
+            $role = $this->planService->updatePlan($id, $data);
+            return $this->okResponse($role, 'Plan updated successfully');
         } catch (ValidationException $e) {
             return $this->handleValidationException($e);
         }
@@ -49,7 +49,6 @@ class RoleController extends BaseController
 
     public function destroy(int $id)
     {
-        return $this->handleDelete($this->roleService, $id, 'Role');
+        return $this->handleDelete($this->planService, $id, 'Plan');
     }
-    
 }

@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FileUploadController;
 use App\Http\Controllers\Api\GenreController;
-use App\Http\Controllers\Api\GenresController;
+use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\RoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,5 +43,18 @@ Route::group([
         Route::delete('/{id}', [RoleController::class, 'destroy']);
     });
 
+    Route::group(['prefix' => 'plans', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [PlanController::class, 'index']);
+        Route::get('/{id}', [PlanController::class, 'show']);
+        Route::post('/', [PlanController::class, 'store']);
+        Route::put('/{id}', [PlanController::class, 'update']);
+        Route::delete('/{id}', [PlanController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'upload', 'middleware' => ['auth:api']], function () {
+        Route::get('/preview', [FileUploadController::class, 'preview']);
+        Route::post('/image', [FileUploadController::class, 'uploadImage']);
+        Route::post('/video', [FileUploadController::class, 'uploadVideo']);
+    });
 
 });
