@@ -1,0 +1,17 @@
+.login:hover{
+    background-color: rgba(255, 0, 0, 0.586)!important;  
+}
+
+.remember .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: rgba(255, 0, 0, 0.586) !important;
+    border-color: rgba(255, 0, 0, 0.586) !important;
+}
+
+.remember .ant-checkbox:hover .ant-checkbox-inner {
+    background-color: rgba(255, 0, 0, 0.586) !important;
+    border-color: rgba(255, 0, 0, 0.586) !important;
+}
+
+.remember .ant-checkbox {
+    --antd-wave-shadow-color: rgba(255, 0, 0, 0.586) !important;
+}

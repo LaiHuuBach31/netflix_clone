@@ -1,0 +1,12 @@
+.footer a{
+    color: gray;
+    text-decoration:underline;
+    font-weight: 500;
+}
+.bt-login:hover, .bt-login:focus {
+    color: black !important; 
+    border: 1px solid white !important; 
+    background-color: rgba(146, 142, 142, 0.967) !important; 
+    transition: 0.3s
+  }
+  

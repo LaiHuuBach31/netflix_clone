@@ -1,0 +1,10 @@
+.profile .ant-upload-wrapper.ant-upload-picture-circle-wrapper .ant-upload.ant-upload-select,
+.ant-upload-wrapper.ant-upload-picture-circle-wrapper .ant-upload-list.ant-upload-list-picture-circle .ant-upload-list-item-container 
+{
+    width: 200px;
+    height: 200px;
+    margin-left: 10px;
+}
+.profile :where(.css-dev-only-do-not-override-1d4w9r2).ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
+    background-color: rgba(255, 0, 0, 0.504);
+}

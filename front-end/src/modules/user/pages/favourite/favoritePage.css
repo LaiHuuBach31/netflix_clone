@@ -1,0 +1,3 @@
+.favorite .ant-select:hover .ant-select-selector{
+    border-color: transparent  !important;
+}
