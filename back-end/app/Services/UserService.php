@@ -27,6 +27,11 @@ class UserService extends BaseService{
 
     public function createUser(array $data)
     {
+        $data = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+        ];
         $dto = new UserDTO($data, true);
         $created = parent::create($dto);
         return UserMapper::fromModel($created);
@@ -34,6 +39,11 @@ class UserService extends BaseService{
 
     public function updateUser(int $id, array $data)
     {
+        $data = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+        ];
         $dto = new UserDTO($data, true);
         $updated = parent::update($id, $dto);
         return UserMapper::fromModel($updated);
