@@ -40,7 +40,6 @@ const GenrePage = () => {
 
 					<GenreTable />
 
-					<OrderDistribution />
 				</main>
 
 			</div>

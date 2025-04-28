@@ -43,13 +43,18 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
+    public function roles() {
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
+    }
+    
+    public function getJWTCustomClaims()
+    {
+        return []; 
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey(); 
     }
 
-    public function getJWTCustomClaims()
-    {
-        return []; 
-    }
 }

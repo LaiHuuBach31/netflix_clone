@@ -15,9 +15,9 @@ abstract class BaseController
         return $this->unprocessableResponse($e->errors(), 'Validation failed');
     }
 
-    protected function handleIndex($service): JsonResponse
+    protected function handleIndex($service, ?string $key = null, ?string $search = null, int $perPage = 10): JsonResponse
     {
-        $items = $service->getAll();
+        $items = $service->getAll($key, $search, $perPage);
         return $this->successResponse($items);
     }
 

@@ -1,10 +1,23 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BannerController;
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\FavouriteController;
 use App\Http\Controllers\Api\FileUploadController;
 use App\Http\Controllers\Api\GenreController;
+use App\Http\Controllers\Api\GenreMovieController;
+use App\Http\Controllers\Api\MenuController;
+use App\Http\Controllers\Api\MovieController;
+use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\RolePermissionController;
+use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserRoleController;
+use App\Http\Controllers\Api\WatchHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,35 +39,139 @@ Route::group([
     Route::post('/login', [AuthController::class, 'login'])->name('login');
 
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
+    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
 
-    Route::group(['prefix' => 'genres', 'middleware' => ['auth:api']], function () {
-        Route::get('/', [GenreController::class, 'index']);
-        Route::get('/{id}', [GenreController::class, 'show']);
-        Route::post('/', [GenreController::class, 'store']);
-        Route::put('/{id}', [GenreController::class, 'update']);
-        Route::delete('/{id}', [GenreController::class, 'destroy']);
+    Route::group(['prefix' => 'users', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [UserController::class, 'index'])->middleware('check.permission:get_users');
+        Route::get('/{id}', [UserController::class, 'show'])->middleware('check.permission:show_user');
+        Route::post('/', [UserController::class, 'store'])->middleware('check.permission:create_user');
+        Route::put('/{id}', [UserController::class, 'update'])->middleware('check.permission:update_user');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->middleware('check.permission:delete_user');
     });
 
     Route::group(['prefix' => 'roles', 'middleware' => ['auth:api']], function () {
-        Route::get('/', [RoleController::class, 'index']);
-        Route::get('/{id}', [RoleController::class, 'show']);
-        Route::post('/', [RoleController::class, 'store']);
-        Route::put('/{id}', [RoleController::class, 'update']);
-        Route::delete('/{id}', [RoleController::class, 'destroy']);
+        Route::get('/', [RoleController::class, 'index'])->middleware('check.permission:get_role');
+        Route::get('/{id}', [RoleController::class, 'show'])->middleware('check.permission:show_role');
+        Route::post('/', [RoleController::class, 'store'])->middleware('check.permission:create_role');
+        Route::put('/{id}', [RoleController::class, 'update'])->middleware('check.permission:update_role');
+        Route::delete('/{id}', [RoleController::class, 'destroy'])->middleware('check.permission:delete_role');
+    });
+
+    Route::group(['prefix' => 'permissions', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [PermissionController::class, 'index'])->middleware('check.permission:get_permissions');
+        Route::get('/{id}', [PermissionController::class, 'show'])->middleware('check.permission:show_permission');
+        Route::post('/', [PermissionController::class, 'store'])->middleware('check.permission:create_permission');
+        Route::put('/{id}', [PermissionController::class, 'update'])->middleware('check.permission:update_permission');
+        Route::delete('/{id}', [PermissionController::class, 'destroy'])->middleware('check.permission:delete_permission');
+    });
+
+    Route::group(['prefix' => 'genres', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [GenreController::class, 'index'])->middleware('check.permission:get_genres');
+        Route::get('/{id}', [GenreController::class, 'show'])->middleware('check.permission:show_genre');
+        Route::post('/', [GenreController::class, 'store'])->middleware('check.permission:create_genre');
+        Route::put('/{id}', [GenreController::class, 'update'])->middleware('check.permission:update_genre');
+        Route::delete('/{id}', [GenreController::class, 'destroy'])->middleware('check.permission:delete_genre');
     });
 
     Route::group(['prefix' => 'plans', 'middleware' => ['auth:api']], function () {
-        Route::get('/', [PlanController::class, 'index']);
-        Route::get('/{id}', [PlanController::class, 'show']);
-        Route::post('/', [PlanController::class, 'store']);
-        Route::put('/{id}', [PlanController::class, 'update']);
-        Route::delete('/{id}', [PlanController::class, 'destroy']);
+        Route::get('/', [PlanController::class, 'index'])->middleware('check.permission:get_plans');
+        Route::get('/{id}', [PlanController::class, 'show'])->middleware('check.permission:show_plan');
+        Route::post('/', [PlanController::class, 'store'])->middleware('check.permission:create_plan');
+        Route::put('/{id}', [PlanController::class, 'update'])->middleware('check.permission:update_plan');
+        Route::delete('/{id}', [PlanController::class, 'destroy'])->middleware('check.permission:delete_plan');
     });
 
     Route::group(['prefix' => 'upload', 'middleware' => ['auth:api']], function () {
-        Route::get('/preview', [FileUploadController::class, 'preview']);
-        Route::post('/image', [FileUploadController::class, 'uploadImage']);
-        Route::post('/video', [FileUploadController::class, 'uploadVideo']);
+        Route::get('/preview', [FileUploadController::class, 'preview'])->middleware('check.permission:preview_upload');
+        Route::post('/image', [FileUploadController::class, 'uploadImage'])->middleware('check.permission:upload_image');
+        Route::post('/video', [FileUploadController::class, 'uploadVideo'])->middleware('check.permission:upload_video');
     });
 
+    Route::group(['prefix' => 'menus', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [MenuController::class, 'index'])->middleware('check.permission:get_menu');
+        Route::get('/{id}', [MenuController::class, 'show'])->middleware('check.permission:show_menu');
+        Route::post('/', [MenuController::class, 'store'])->middleware('check.permission:create_menu');
+        Route::put('/{id}', [MenuController::class, 'update'])->middleware('check.permission:update_menu');
+        Route::delete('/{id}', [MenuController::class, 'destroy'])->middleware('check.permission:delete_menu');
+    });
+
+    Route::group(['prefix' => 'movies', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [MovieController::class, 'index'])->middleware('check.permission:get_movies');
+        Route::get('/{id}', [MovieController::class, 'show'])->middleware('check.permission:show_movie');
+        Route::post('/', [MovieController::class, 'store'])->middleware('check.permission:create_movie');
+        Route::put('/{id}', [MovieController::class, 'update'])->middleware('check.permission:update_movie');
+        Route::delete('/{id}', [MovieController::class, 'destroy'])->middleware('check.permission:delete_movie');
+    });
+
+    Route::group(['prefix' => 'banners', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [BannerController::class, 'index'])->middleware('check.permission:get_banners');
+        Route::get('/{id}', [BannerController::class, 'show'])->middleware('check.permission:show_banner');
+        Route::post('/', [BannerController::class, 'store'])->middleware('check.permission:create_banner');
+        Route::put('/{id}', [BannerController::class, 'update'])->middleware('check.permission:update_banner');
+        Route::delete('/{id}', [BannerController::class, 'destroy'])->middleware('check.permission:delete_banner');
+    });
+
+    Route::group(['prefix' => 'subscriptions', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->middleware('check.permission:get_subscriptions');
+        Route::get('/{id}', [SubscriptionController::class, 'show'])->middleware('check.permission:show_subscription');
+        Route::post('/', [SubscriptionController::class, 'store'])->middleware('check.permission:create_subscription');
+        Route::put('/{id}', [SubscriptionController::class, 'update'])->middleware('check.permission:update_subscription');
+        Route::delete('/{id}', [SubscriptionController::class, 'destroy'])->middleware('check.permission:delete_subscription');
+    });
+
+    Route::group(['prefix' => 'watch-history', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [WatchHistoryController::class, 'index'])->middleware('check.permission:get_watch_history');
+        Route::get('/{id}', [WatchHistoryController::class, 'show'])->middleware('check.permission:show_watch_history');
+        Route::post('/', [WatchHistoryController::class, 'store'])->middleware('check.permission:create_watch_history');
+        Route::put('/{id}', [WatchHistoryController::class, 'update'])->middleware('check.permission:update_watch_history');
+        Route::delete('/{id}', [WatchHistoryController::class, 'destroy'])->middleware('check.permission:delete_watch_history');
+    });
+
+    Route::group(['prefix' => 'ratings', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [RatingController::class, 'index'])->middleware('check.permission:get_ratings');
+        Route::get('/{id}', [RatingController::class, 'show'])->middleware('check.permission:show_rating');
+        Route::post('/', [RatingController::class, 'store'])->middleware('check.permission:create_rating');
+        Route::put('/{id}', [RatingController::class, 'update'])->middleware('check.permission:update_rating');
+        Route::delete('/{id}', [RatingController::class, 'destroy'])->middleware('check.permission:delete_rating');
+    });
+
+    Route::group(['prefix' => 'favourites', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [FavouriteController::class, 'index'])->middleware('check.permission:get_favourites');
+        Route::get('/{id}', [FavouriteController::class, 'show'])->middleware('check.permission:show_favourite');
+        Route::post('/', [FavouriteController::class, 'store'])->middleware('check.permission:create_favourite');
+        Route::put('/{id}', [FavouriteController::class, 'update'])->middleware('check.permission:update_favourite');
+        Route::delete('/{id}', [FavouriteController::class, 'destroy'])->middleware('check.permission:delete_favourite');
+    });
+
+    Route::group(['prefix' => 'comments', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [CommentController::class, 'index'])->middleware('check.permission:get_comments');
+        Route::get('/{id}', [CommentController::class, 'show'])->middleware('check.permission:show_comment');
+        Route::post('/', [CommentController::class, 'store'])->middleware('check.permission:create_comment');
+        Route::put('/{id}', [CommentController::class, 'update'])->middleware('check.permission:update_comment');
+        Route::delete('/{id}', [CommentController::class, 'destroy'])->middleware('check.permission:delete_comment');
+    });
+
+    Route::group(['prefix' => 'genre-movie', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [GenreMovieController::class, 'index'])->middleware('check.permission:get_genre_movie');
+        Route::get('/{id}', [GenreMovieController::class, 'show'])->middleware('check.permission:show_genre_movie');
+        Route::post('/', [GenreMovieController::class, 'store'])->middleware('check.permission:create_genre_movie');
+        Route::put('/{id}', [GenreMovieController::class, 'update'])->middleware('check.permission:update_genre_movie');
+        Route::delete('/{id}', [GenreMovieController::class, 'destroy'])->middleware('check.permission:delete_genre_movie');
+    });
+
+    Route::group(['prefix' => 'user-role', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [UserRoleController::class, 'index'])->middleware('check.permission:get_user_role');
+        Route::get('/{id}', [UserRoleController::class, 'show'])->middleware('check.permission:show_user_role');
+        Route::post('/', [UserRoleController::class, 'store'])->middleware('check.permission:create_user_role');
+        Route::put('/{id}', [UserRoleController::class, 'update'])->middleware('check.permission:update_user_role');
+        Route::delete('/{id}', [UserRoleController::class, 'destroy'])->middleware('check.permission:delete_user_role');
+    });
+
+    Route::group(['prefix' => 'role-permission', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [RolePermissionController::class, 'index'])->middleware('check.permission:get_role_permission');
+        Route::get('/{id}', [RolePermissionController::class, 'show'])->middleware('check.permission:show_role_permission');
+        Route::post('/', [RolePermissionController::class, 'store'])->middleware('check.permission:create_role_permission');
+        Route::put('/{id}', [RolePermissionController::class, 'update'])->middleware('check.permission:update_role_permission');
+        Route::delete('/{id}', [RolePermissionController::class, 'destroy'])->middleware('check.permission:delete_role_permission');
+    });
 });

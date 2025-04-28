@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PermissionsRole extends Model
+class UserRole extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id', 'permission_id', 'role_id'];
+    protected $fillable = ['id', 'user_id', 'role_id'];
 }

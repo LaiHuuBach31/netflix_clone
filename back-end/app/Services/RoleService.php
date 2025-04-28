@@ -2,7 +2,7 @@
     namespace App\Services;
 
 use App\DTOs\RoleDTO;
-use App\Mapper\GenreMapper;
+use App\Mapper\RoleMapper;
 use App\Repositories\RoleRepository;
 
 class RoleService extends BaseService {
@@ -12,29 +12,30 @@ class RoleService extends BaseService {
         $this->repository = $roleRepository;
     }
 
-    public function getAll()
+    public function getAll(?string $key = null, ?string $search = null, int $perPage = 10)
     {
-        $roles = parent::getAll();
-        return $roles->map(fn($role) => GenreMapper::fromModel($role));
+        $roles = parent::getAll($key, $search, $perPage);
+        $roles->getCollection()->transform(fn($role) => RoleMapper::fromModel($role));
+        return $roles;
     }
 
     public function findById(int $id)
     {
         $genre = parent::findById($id);
-        return GenreMapper::fromModel($genre);
+        return RoleMapper::fromModel($genre);
     }
 
     public function createRole(array $data)
     {
         $dto = new RoleDTO($data, true);
         $created = parent::create($dto);
-        return GenreMapper::fromModel($created);
+        return RoleMapper::fromModel($created);
     }
 
     public function updateRole(int $id, array $data)
     {
         $dto = new RoleDTO($data, true);
         $updated = parent::update($id, $dto);
-        return GenreMapper::fromModel($updated);
+        return RoleMapper::fromModel($updated);
     }
 }

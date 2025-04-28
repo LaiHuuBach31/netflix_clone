@@ -12,11 +12,11 @@ class PlanService extends BaseService {
         $this->repository = $genreRepository;
     }
 
-    public function getAll()
+    public function getAll(?string $key = null, ?string $search = null, int $perPage = 10)
     {
-        $genres = parent::getAll();
-        return $genres->map(fn($genre) => PlanMapper::fromModel($genre));
-
+        $plans = parent::getAll($key, $search, $perPage);
+        $plans->getCollection()->transform(fn($plan) => PlanMapper::fromModel($plan));
+        return $plans;
     }
 
     public function findById(int $id)

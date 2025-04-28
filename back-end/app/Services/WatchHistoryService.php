@@ -21,8 +21,8 @@ class WatchHistoryService extends BaseService{
 
     public function findById(int $id)
     {
-        $genre = parent::findById($id);
-        return WatchHistoryMapper::fromModel($genre);
+        $watchHistory = parent::findById($id);
+        return WatchHistoryMapper::fromModel($watchHistory);
     }
 
     public function createWatchHistory(array $data)

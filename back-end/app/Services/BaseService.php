@@ -6,16 +6,17 @@ use App\Exceptions\CreationFailedException;
 use App\Exceptions\DeletionFailedException;
 use App\Exceptions\UpdateFailedException;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
-abstract class BaseService{
-
+abstract class BaseService
+{
     protected $repository;
 
-    function getAll() {
+    function getAll(?string $key = null ,?string $search = null, int $perPage = 10) {
         try {
-            return $this->repository->getAll();
+            return $this->repository->getAll($key, $search, $perPage);
         } catch (\Exception $e) {
             throw new Exception('Failed to retrieve resources: ' . $e->getMessage());
         }
@@ -32,33 +33,46 @@ abstract class BaseService{
     }
 
     function create(BaseDTO $dto) {
+        DB::beginTransaction();
         try {
-            return $this->repository->createOrUpdate($dto->toArray());
+            $result = $this->repository->createOrUpdate($dto->toArray());
+            DB::commit();
+            return $result;
         } catch (\Exception $e) {
+            DB::rollBack();
             throw new CreationFailedException('Failed to create resource: ' . $e->getMessage());
         }
     }
 
     function update(int $id, BaseDTO $dto) {
+        DB::beginTransaction();
         try {
             $data = $dto->toArray();
             $data['id'] = $id;
-            return $this->repository->createOrUpdate($data);
+            $result = $this->repository->createOrUpdate($data);
+            DB::commit();
+            return $result;
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             throw new ResourceNotFoundException('Resource not found with ID: ' . $id);
         } catch (\Exception $e) {
+            DB::rollBack();
             throw new UpdateFailedException('Failed to update resource: ' . $e->getMessage());
         }
     }
 
     function delete(int $id) {
+        DB::beginTransaction();
         try {
-            return $this->repository->delete($id);
+            $result = $this->repository->delete($id);
+            DB::commit();
+            return $result;
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             throw new ResourceNotFoundException('Resource not found with ID: ' . $id);
         } catch (\Exception $e) {
-            throw new DeletionFailedException('Failed to update resource: ' . $e->getMessage());
+            DB::rollBack();
+            throw new DeletionFailedException('Failed to delete resource: ' . $e->getMessage());
         }
     }
-
 }

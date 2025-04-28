@@ -15,9 +15,11 @@ class PlanController extends BaseController
         $this->planService = $planService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->handleIndex($this->planService);
+        $search = $request->query('search');
+        $perPage = $request->query('per_page', 10);
+        return $this->handleIndex($this->planService, 'name', $search, $perPage);
     }
 
     public function show(int $id)
