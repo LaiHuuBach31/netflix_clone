@@ -16,6 +16,7 @@ class UserRepository extends BaseRepository{
             ['id' => $data['id'] ?? null],
             [
                 'name' => $data['name'],
+                'avatar' => $data['avatar'],
                 'email' => $data['email'],
                 'password' => $data['password'],
             ]

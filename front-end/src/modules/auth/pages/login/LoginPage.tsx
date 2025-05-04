@@ -1,10 +1,58 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Checkbox, Flex, Form, Input } from 'antd'
-import React from 'react'
+import React, { useState } from 'react'
 import './loginPage.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../context/AuthContext';
+import authService from '../../services/authService';
+import { Bounce, toast } from 'react-toastify';
+import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
 
-const LoginPage = () => {
+const LoginPage: React.FC = () => {
+
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+
+    try {
+      const response = await authService.login({ email, password });
+      login(response.data.access_token, response.data.user);
+      const roles = response.data.user.roles || [];
+      console.log(response);
+      if (roles.includes('Admin')) {
+        navigate("/admin")
+      } else {
+        navigate("/");
+      }
+      showSuccessToast(response.message);
+    } catch (err: any) {
+      let errorMessage = "An unexpected error occurred";
+      if (err.response) {
+        if (err.response.status === 422) {
+          const errors = err.response.data.errors;
+          errorMessage =
+            errors.email?.[0] || 
+            errors.password?.[0] || 
+            err.response.data.message; 
+        } else {
+          errorMessage = err.response.data?.message || err.response.statusText;
+        }
+      } else if (err.request) {
+        errorMessage = "No response from server";
+      } else {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
+      showErrorToast(errorMessage);
+    }
+
+  };
+
+
   return (
     <>
       <div
@@ -23,19 +71,26 @@ const LoginPage = () => {
 
           <Form
             name="login"
+            onFinish={handleLogin}
             initialValues={{ remember: true }}
             layout="vertical"
           >
             <Form.Item
-              name="username"
-              rules={[{ required: true, message: 'Please input your Username!' }]}
+              name="email"
+
+              rules={[
+                { required: true, message: 'Please input your Email!' },
+                { type: 'email', message: 'Please enter a valid Email address!' },
+              ]}
             >
               <Input
+                onChange={(e) => setEmail(e.target.value)}
                 prefix={<UserOutlined />}
-                placeholder="Email or phone number"
-                className="bg-[#333] border-none text-black focus:text-black placeholder-gray-400 p-4"
+                placeholder="Email"
+                className="bg-[#333] border-none text-black placeholder-gray-400 p-4"
                 size="large"
               />
+
             </Form.Item>
 
             <Form.Item
@@ -43,6 +98,7 @@ const LoginPage = () => {
               rules={[{ required: true, message: 'Please input your Password!' }]}
             >
               <Input.Password
+                onChange={(e) => setPassword(e.target.value)}
                 prefix={<LockOutlined />}
                 placeholder="Password"
                 className="bg-[#333] border-none text-black placeholder-gray-400 p-4"
@@ -63,7 +119,7 @@ const LoginPage = () => {
             </Form.Item>
 
             <Flex justify="space-between" className="text-sm text-gray-300 mb-4">
-              <Form.Item name="remember" className='remember' valuePropName="" noStyle>
+              <Form.Item name="" className='remember' valuePropName="" noStyle>
                 <Checkbox className="text-white remember">Remember me</Checkbox>
               </Form.Item>
               <a href="#" className="text-white">Need help?</a>

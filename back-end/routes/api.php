@@ -40,7 +40,8 @@ Route::group([
     Route::post('/register', [AuthController::class, 'register'])->name('login');
 
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
-    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::get('/user', [AuthController::class, 'getUser'])->middleware('auth:api');
 
     Route::group(['prefix' => 'users', 'middleware' => ['auth:api']], function () {
         Route::get('/', [UserController::class, 'index'])->middleware('check.permission:get_users');

@@ -1,24 +1,36 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Avatar, Badge, Button, Dropdown, MenuProps, Space } from 'antd';
-import { BellOutlined, SearchOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
+import { BellOutlined, SearchOutlined, UserOutlined, SettingOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Header } from 'antd/es/layout/layout';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 
-const items: MenuProps['items'] = [
-  { key: '1', label: 'My Account', disabled: true },
-  { type: 'divider' },
-  { key: '2', label: <Link to="/profile">Profile</Link>, extra: '⌘P' },
-  { key: '3', label: 'Billing', extra: '⌘B' },
-  { key: '4', label: 'Settings', icon: <SettingOutlined />, extra: '⌘S' },
-];
 
 const HeaderBar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { user, logout } = useAuth();
+  const hasAdminRole = user?.roles?.includes("Admin") || false;
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
   }, [isOpen]);
+
+  const items: MenuProps['items'] = [
+    { key: '1', label: 'My Account', disabled: true },
+    { type: 'divider' },
+    { key: "2", label: <Link to={hasAdminRole ? "/admin" : "/dashboard"}>Dashboard</Link>, extra: "⌘P" },
+    { key: '3', label: <Link to="/profile">Profile</Link>, extra: '⌘P' },
+    { key: '4', label: 'Settings', icon: <SettingOutlined />, extra: '⌘S' },
+    {
+      key: '5',
+      label: 'Logout',
+      icon: <LogoutOutlined />,
+      onClick: async () => {
+        await logout();
+      },
+    },
+  ];
 
   return (
     <Header className="flex items-center justify-between px-15 bg-[#242424f7]">
@@ -30,13 +42,13 @@ const HeaderBar: React.FC = () => {
             alt="Logo"
           />
         </Link>
-     
-        <ul className="flex gap-5 list-none text-red-600">
-          <li><Link to={''} className="font-medium hover:text-gray-300">Home</Link> <a ></a></li>
-          <li><Link to={'/tv-show'} className="font-medium hover:text-gray-300">TV Shows</Link> <a ></a></li>
-          <li><Link to={'/movies'} className="font-medium hover:text-gray-300">Movies</Link> <a ></a></li>
-          <li><Link to={'/recently-added'} className="font-medium hover:text-gray-300">Recently Added</Link> <a ></a></li>
-          <li><Link to={'/favourite'} className="font-medium hover:text-gray-300">My List</Link> <a ></a></li>
+
+        <ul className="flex gap-5 list-none text-red-600 m-0">
+          <li><Link to={''} className="font-medium hover:text-gray-300">Home</Link></li>
+          <li><Link to={'/tv-show'} className="font-medium hover:text-gray-300">TV Shows</Link></li>
+          <li><Link to={'/movies'} className="font-medium hover:text-gray-300">Movies</Link></li>
+          <li><Link to={'/recently-added'} className="font-medium hover:text-gray-300">Recently Added</Link></li>
+          <li><Link to={'/favourite'} className="font-medium hover:text-gray-300">My List</Link></li>
         </ul>
       </div>
 
@@ -54,27 +66,37 @@ const HeaderBar: React.FC = () => {
 
         <BellOutlined className="text-red-600 text-xl px-8" />
 
-        <Space size={24}>
-          <Badge count={1}>
-            <Avatar shape="square" icon={<UserOutlined />} />
-          </Badge>
-          <Dropdown menu={{ items }} className="px-3">
-            <a onClick={(e) => e.preventDefault()}>
-              <Space>
-                <Badge dot>
-                  <Avatar shape="square" src="https://media.vov.vn/sites/default/files/styles/large/public/2025-02/liverpool-2.jpg" />
+        <Space size={24} className='pr-3'>
+          {
+            !user ? (
+              <Link to="/login">
+                <Badge count={1} >
+                  <Avatar shape="square" icon={<UserOutlined />} />
                 </Badge>
-              </Space>
-            </a>
-          </Dropdown>
+              </Link>
+            ) : (
+              <Dropdown menu={{ items }} className="pr-8">
+                <a onClick={(e) => e.preventDefault()}>
+                  <Space>
+                    <Badge dot>
+                      <Avatar shape="square" src={user?.avatar ?? 'https://media.vov.vn/sites/default/files/styles/large/public/2025-02/liverpool-2.jpg'} />
+                    </Badge>
+                  </Space>
+                </a>
+              </Dropdown>
+            )
+          }
         </Space>
 
-        <Link to="/login">
-          <Button className="bt-login font-medium" shape="round">
-            Đăng nhập
-          </Button>
-        </Link>
-
+        {/* {
+          !user && (
+            <Link to="/login">
+              <Button className="bt-login font-medium" shape="round">
+                Login
+              </Button>
+            </Link>
+          )
+        } */}
       </div>
     </Header>
   );

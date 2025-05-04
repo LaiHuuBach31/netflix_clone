@@ -72,7 +72,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $e, $request) {
-            return $this->errorResponse([], 'An unexpected error occurred: ' . $e->getMessage());
+            return $this->errorResponse([], $e->getMessage());
         });
 
         $this->renderable(function (AuthenticationException $e, $request) {

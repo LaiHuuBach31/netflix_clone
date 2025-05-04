@@ -1,5 +1,5 @@
 import AdminLayout from "../../../layout/AdminLayout";
-import PrivateRoute from "../../../components/PrivateRoute";
+import PrivateRoute from "../../../routes/ProtectedRoute";
 import OverviewPage from "../pages/OverviewPage";
 import UsersPage from "../pages/UsersPage";
 import OrdersPage from "../pages/OrdersPage";
@@ -7,7 +7,7 @@ import SettingsPage from "../pages/SettingsPage";
 import GenrePage from "../pages/GenrePage";
 
 
-const adminRoutes = [
+const AdminRoute = [
   {
     path: '/admin',
     element: <PrivateRoute />, 
@@ -26,4 +26,4 @@ const adminRoutes = [
   }
 ];
 
-export default adminRoutes;
+export default AdminRoute;

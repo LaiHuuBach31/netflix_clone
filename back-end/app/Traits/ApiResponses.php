@@ -9,7 +9,7 @@ trait ApiResponses
 {
     public function successResponse(
         mixed $data = null,
-        string $message = 'Request successful',
+        ?string $message = 'Request successful',
         int $statusCode = Response::HTTP_OK
     ): JsonResponse {
         return response()->json([

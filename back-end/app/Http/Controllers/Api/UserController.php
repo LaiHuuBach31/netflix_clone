@@ -25,6 +25,7 @@ class UserController extends BaseController
 
     public function show(int $id)
     {
+        $a = $this->handleShow($this->userService, $id);
         return $this->handleShow($this->userService, $id);
     }
 
@@ -32,6 +33,7 @@ class UserController extends BaseController
     {
         $data = [
             "name" => $request->name,
+            "avatar" => $request->avatar ,
             "email" => $request->email ,
             "password" => bcrypt($request->password),
         ];
@@ -50,6 +52,7 @@ class UserController extends BaseController
             ['id' => $id], 
             [
                 "name" => $request->name,
+                "avatar" => $request->avatar,
                 "email" => $request->email ,
                 "password" => bcrypt($request->password),
             ]

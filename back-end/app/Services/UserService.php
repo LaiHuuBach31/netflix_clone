@@ -29,6 +29,7 @@ class UserService extends BaseService{
     {
         $data = [
             'name' => $data['name'],
+            'avatar' => $data['avatar'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ];
@@ -41,6 +42,7 @@ class UserService extends BaseService{
     {
         $data = [
             'name' => $data['name'],
+            'avatar' => $data['avatar'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ];

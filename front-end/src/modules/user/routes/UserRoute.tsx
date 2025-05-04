@@ -7,7 +7,7 @@ import ProfilePage from "../pages/profile/ProfilePage";
 import RecentlyAddedPage from "../pages/recently-added/RecentlyAddedPage";
 import TVShowPage from "../pages/tv-show/TVShowPage";
 
-const userRoutes = [{
+const UserRoute = [{
     path: '/',
     element: <UserLayout />,
     children: [
@@ -21,4 +21,4 @@ const userRoutes = [{
     ]
 }]
 
-export default userRoutes;
+export default UserRoute;

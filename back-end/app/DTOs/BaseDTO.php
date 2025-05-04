@@ -27,7 +27,7 @@ abstract class BaseDTO implements ArrayAccess, JsonSerializable
     }
 
     public function __set($key, $value) {
-        $this->attributes[$key] = $value; 
+        $this->attributes[$key] = $value;
     }
 
     public function offsetExists(mixed $offset): bool

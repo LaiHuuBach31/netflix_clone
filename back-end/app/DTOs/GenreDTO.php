@@ -7,6 +7,8 @@ use Illuminate\Validation\ValidationException;
 
 class GenreDTO extends BaseDTO {
 
+    public string $name;
+
     public function __construct(array $data, bool $validate = false) {
 
         if ($validate) {
