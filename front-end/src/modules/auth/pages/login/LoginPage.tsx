@@ -16,12 +16,12 @@ const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async () => {
 
     try {
       const response = await authService.login({ email, password });
-      login(response.data.access_token, response.data.user);
-      const roles = response.data.user.roles || [];
+      login(response.data.access_token, response.data.refresh_token, response.data.user);
+      const roles = response.data.user?.roles || [];
       console.log(response);
       if (roles.includes('Admin')) {
         navigate("/admin")
@@ -35,9 +35,9 @@ const LoginPage: React.FC = () => {
         if (err.response.status === 422) {
           const errors = err.response.data.errors;
           errorMessage =
-            errors.email?.[0] || 
-            errors.password?.[0] || 
-            err.response.data.message; 
+            errors.email?.[0] ||
+            errors.password?.[0] ||
+            err.response.data.message;
         } else {
           errorMessage = err.response.data?.message || err.response.statusText;
         }

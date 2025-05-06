@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\DTOs\UserDTO;
 use App\Http\Controllers\Controller;
 use App\Mapper\UserMapper;
+use App\Models\RefreshToken;
 use App\Models\User;
 use App\Services\UserRoleService;
 use App\Services\UserService;
@@ -169,12 +170,11 @@ class AuthController extends Controller
                 return $this->unauthorizedResponse([], 'Refresh token is missing');
             }
 
-            $tokenRecord = DB::table('refresh_tokens')
-                ->where('token', $refreshToken)
+            $tokenRecord = RefreshToken::where('token', $refreshToken)
                 ->where('expires_at', '>', now())
                 ->first();
 
-            if (!$tokenRecord) {
+                if (!$tokenRecord) {
                 return $this->unauthorizedResponse([], 'Invalid or expired refresh token');
             }
 
@@ -186,7 +186,7 @@ class AuthController extends Controller
             $newToken = Auth::login($user);
 
             $newRefreshToken = bin2hex(random_bytes(40));
-            DB::table('refresh_tokens')->where('token', $refreshToken)->delete();
+            RefreshToken::where('token', $refreshToken)->delete();
             DB::table('refresh_tokens')->insert([
                 'token' => $newRefreshToken,
                 'user_id' => $user->id,
@@ -195,11 +195,22 @@ class AuthController extends Controller
                 'updated_at' => now(),
             ]);
 
+            $user = auth()->user();
+            $roles = $user->roles->pluck('name');
+            $userDto = new UserDTO([
+                'id' => $user->id,
+                'name' => $user->name,
+                'avatar' => $user->avatar,
+                'email' => $user->email,
+                'roles' => $roles
+            ]);
+
             return $this->successResponse([
                 'access_token' => $newToken,
                 'refresh_token' => $newRefreshToken,
                 'token_type' => 'Bearer',
                 'expires_in' => config('jwt.ttl') * 60,
+                'user' => $userDto,
             ], 'Token refreshed successfully');
         } catch (\Exception $e) {
             return $this->unauthorizedResponse([], 'Failed to refresh token', $e->getMessage());

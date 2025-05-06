@@ -21,7 +21,7 @@ interface AuthResponse {
         refresh_token: string,
         token_type: string,
         expires_in: number;
-        user: {
+        user?: {
             id: number;
             name: string;
             avatar?: string;
@@ -53,6 +53,8 @@ interface Response {
 const authService = {
     // login
     login: async (data: LoginRequest): Promise<AuthResponse> => {
+        console.log('login service');
+        
         const response = await api.post<AuthResponse>('/login', data);
 
         const { access_token, refresh_token } = response.data.data;
@@ -82,33 +84,58 @@ const authService = {
     },
 
     // logout 
-    logout: async (): Promise<Response> => {
-        const response = await api.post<Response>('/logout');
-        if (response.data.status === true) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
+    logout: async (): Promise<Response> => {        
+        try {
+            const response = await api.post<Response>('/logout');
+            console.log('Response:', response);
+            if (response.data.status === true) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+            }
+            return response.data;
+        } catch (error: any) {
+            console.error('Logout failed:', error);
+            if (error.response) {
+                console.error('Status:', error.response.status);
+                console.error('Data:', error.response.data);
+            }
+            throw error;
         }
-        return response.data;
     },
 
     // refresh token
     refreshToken: async (): Promise<AuthResponse> => {
         const refreshToken = localStorage.getItem('refresh_token');
+       
         if (!refreshToken) {
             throw new Error('No refresh token available');
         }
 
-        const response = await api.post<AuthResponse>('/refresh', {}, {
-            headers: { Authorization: `Bearer ${refreshToken}` },
-        });
+        try {            
+            const response = await api.post<AuthResponse>('/refresh', {}, {
+                headers: { Authorization: `Bearer ${refreshToken}` },
+            });
+            console.log('Refresh response:', response);
 
-        const { access_token, refresh_token } = response.data.data;
-        if (access_token && refresh_token) {
-            localStorage.setItem('access_token', access_token);
-            localStorage.setItem('refresh_token', refresh_token);
+            if (response.data.status === true) {
+                const { access_token, refresh_token } = response.data.data;
+                if (access_token && refresh_token) {
+                    localStorage.setItem('access_token', access_token);
+                    localStorage.setItem('refresh_token', refresh_token);
+                }
+            } else {
+                throw new Error(response.data.message || 'Refresh failed');
+            }
+            return response.data;
+        } catch (error: any) {
+            console.error('Refresh error:', error);
+            if (error.response) {
+                console.error('Status:', error.response.status);
+                console.error('Data:', error.response.data);
+            }
+            throw error;
         }
-        return response.data;
-    }
+    },
 }
 
 export default authService

@@ -14,7 +14,7 @@ interface AuthContextType {
         roles: string[]
     } | null;
 
-    login: (token: string, user: any) => void;
+    login: (accessToken: string, refreshToken: string, user: any) => void;
 
     logout: () => void;
 }
@@ -49,55 +49,72 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }
 
-    useEffect(() => {
+    const refreshAccessToken = async () => {
+        try {
+            console.log('refreshAccessToken');
+            // logout();
+            const response = await authService.refreshToken();
+            const { access_token, refresh_token, user: userData } = response.data;  
+            login(access_token, refresh_token, userData);
+        } catch (error) {
+            console.error('Refresh failed:', error);
+            console.log('logout');
+            logout();
+        }
+    };
 
+    useEffect(() => {
         const checkAuth = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const accessToken = localStorage.getItem('access_token');
+                const refreshToken = localStorage.getItem('refresh_token');
 
-                if (token) {
-                    if (isTokenExpired(token)) {
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        setIsAuthenticated(false);
-                        setUser(null);
+                if (accessToken && refreshToken) {
+                    if (isTokenExpired(accessToken)) {
+                        await refreshAccessToken();
                     } else {
+                        const decoded = jwtDecode<JwtPayload>(accessToken);
+                        const expirestAt = decoded.exp! * 1000;
+                        const timeToRefresh = expirestAt - Date.now() - 5 * 60 * 1000;
+                        
+                        if(timeToRefresh > 0){
+                            setTimeout(refreshAccessToken, timeToRefresh);
+                        }
                         const response = await authService.getUserInfo();
                         setUser(response.data);
                         setIsAuthenticated(true);
-
-                        const interval = setInterval(() => {
-                            const currentToken = localStorage.getItem('token');
-                            if (currentToken && isTokenExpired(currentToken)) {
-                                localStorage.removeItem('token');
-                                localStorage.removeItem('user');
-                                setIsAuthenticated(false);
-                                setUser(null);
-                                window.location.href = '/login';
-                                clearInterval(interval);
-                            }
-                        }, 60000);
                     }
                 } else {
                     setIsAuthenticated(false);
                     setUser(null);
                 }
             } catch (error) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                console.error('Auth check failed:', error);
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
                 setIsAuthenticated(false);
                 setUser(null);
             }
             setLoading(false);
         };
         checkAuth();
+
+        const interval = setInterval(() => {
+            const accessToken = localStorage.getItem('access_token');
+            if (accessToken && isTokenExpired(accessToken)) {
+                refreshAccessToken();
+            }
+        }, 60000); 
+
+        return () => clearInterval(interval);
     }, []);
 
-    const login = (token: string, userData: any) => {
-        console.log('login in auth');
-        
+    const login = (accessToken: string, refreshToken: string, userData: any) => {  
+        console.log('login auth');
+              
         try {
-            localStorage.setItem('token', token);
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('refresh_token', refreshToken);
             localStorage.setItem('user', JSON.stringify(userData));
             setIsAuthenticated(true);
             setUser(userData);
@@ -113,13 +130,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const logout = async () => {
         try {
+            console.log('logout auth');
             await authService.logout();
-            localStorage.removeItem('token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
             setIsAuthenticated(false);
             setUser(null);
             
-            window.location.href = '/login';
+            // window.location.href = '/login';
         } catch (error) {
             console.error('Logout failed:', error);
         }
