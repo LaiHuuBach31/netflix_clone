@@ -1,6 +1,7 @@
 import React from 'react'
 import api from '../../../services/api';
 import { truncate } from 'fs';
+import { showSuccessToast } from '../../../utils/toast';
 
 interface LoginRequest {
     email: string,
@@ -92,6 +93,7 @@ const authService = {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
             }
+            showSuccessToast(response.data.message);
             return response.data;
         } catch (error: any) {
             console.error('Logout failed:', error);

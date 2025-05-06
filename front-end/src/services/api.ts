@@ -28,20 +28,28 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// handle error response
+// Handle error response
 api.interceptors.response.use(
     (response: AxiosResponse) => response,
     async (error) => {
-        const originalRequest = error.config;
-        if (error.response?.status === 401 && originalRequest._retry) {
+        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+        originalRequest._retry = originalRequest._retry || false; 
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
                 await authService.refreshToken();
                 const newToken = localStorage.getItem('access_token');
-                api.defaults.headers.Authorization = `Bearer ${newToken}`;
-                originalRequest.header.Authorization = `Bearer ${newToken}`;
-                return api(originalRequest);
+                if (newToken) {
+                    api.defaults.headers.Authorization = `Bearer ${newToken}`;
+                    originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                    return api(originalRequest);
+                } else {
+                    throw new Error('Failed to retrieve new access token');
+                }
             } catch (refreshError) {
+                console.error('Refresh token failed:', refreshError);
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
                 return Promise.reject(refreshError);
             }
         }

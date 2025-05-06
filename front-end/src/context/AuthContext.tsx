@@ -58,7 +58,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             login(access_token, refresh_token, userData);
         } catch (error) {
             console.error('Refresh failed:', error);
-            console.log('logout');
             logout();
         }
     };
