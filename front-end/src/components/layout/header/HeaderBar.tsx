@@ -3,14 +3,17 @@ import { Avatar, Badge, Button, Dropdown, MenuProps, Space } from 'antd';
 import { BellOutlined, SearchOutlined, UserOutlined, SettingOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Header } from 'antd/es/layout/layout';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutAsync } from '../../../store/slices/authSlice';
+import { AppDispatch, RootState } from '../../../store';
 
 
 const HeaderBar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { user, logout } = useAuth();
-  const hasAdminRole = user?.roles?.includes("Admin") || false;
+  const { user } = useSelector((state: RootState) => state.auth); 
+  const hasAdminRole = user?.roles?.includes('Admin') || false;
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
@@ -27,7 +30,7 @@ const HeaderBar: React.FC = () => {
       label: 'Logout',
       icon: <LogoutOutlined />,
       onClick: async () => {
-        await logout();
+        await dispatch(logoutAsync());
       },
     },
   ];

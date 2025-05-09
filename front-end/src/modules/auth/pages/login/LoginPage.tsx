@@ -3,53 +3,37 @@ import { Button, Checkbox, Flex, Form, Input } from 'antd'
 import React, { useState } from 'react'
 import './loginPage.css';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../../context/AuthContext';
-import authService from '../../services/authService';
-import { Bounce, toast } from 'react-toastify';
 import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginAsync } from '../../../../store/slices/authSlice';
+import { AppDispatch, RootState } from '../../../../store';
 
 const LoginPage: React.FC = () => {
 
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error, user} = useSelector((state: RootState) => state.auth);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-
     try {
-      const response = await authService.login({ email, password });
-      login(response.data.access_token, response.data.refresh_token, response.data.user);
-      const roles = response.data.user?.roles || [];
-      console.log(response);
+      const result = await dispatch(loginAsync({email, password})).unwrap();
+      console.log('re', result);
+      console.log(user, 'user');
+      
+            
+      const roles = result.user?.roles || [];      
       if (roles.includes('Admin')) {
-        navigate("/admin")
+        navigate("/admin");
       } else {
         navigate("/");
       }
-      showSuccessToast(response.message);
-    } catch (err: any) {
-      let errorMessage = "An unexpected error occurred";
-      if (err.response) {
-        if (err.response.status === 422) {
-          const errors = err.response.data.errors;
-          errorMessage =
-            errors.email?.[0] ||
-            errors.password?.[0] ||
-            err.response.data.message;
-        } else {
-          errorMessage = err.response.data?.message || err.response.statusText;
-        }
-      } else if (err.request) {
-        errorMessage = "No response from server";
-      } else {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
-      showErrorToast(errorMessage);
+      showSuccessToast("Login successful");
+    } catch (error:any) {
+      console.log(error);
+      showErrorToast(error);
     }
-
   };
 
 

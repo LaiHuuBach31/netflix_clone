@@ -1,15 +1,19 @@
-import React from 'react'
-import { useAuth } from '../../../context/AuthContext'
+import React, { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const GuestRoute:React.FC = () => {
-    const {isAuthenticated} = useAuth();
 
-    if(isAuthenticated){
-        return <Navigate to="/" replace />
-    }
+    const {isAuthenticated} = useSelector((state: RootState) => state.auth);
+    const access_token = localStorage.getItem('access_token');
+    const refresh_token = localStorage.getItem('refresh_token');
 
-    return <Outlet />
-}
+    if (access_token && refresh_token) {
+    return <Navigate to="/" replace />;
+  }
 
-export default GuestRoute
+    return <Outlet />;
+};
+
+export default GuestRoute;

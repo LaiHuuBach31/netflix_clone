@@ -59,6 +59,7 @@ const Sidebar = () => {
 													{item.name}
 												</motion.span>
 											)}
+											
 										</AnimatePresence>
 									</motion.div>
 								</Link>

@@ -24,10 +24,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     const auth = useAuthHook();
-
-    if (auth.loading) {
-        return <div>Loading...</div>;
-    }
+    console.log('loading', auth.loading);
+    console.log('user', auth.user);
+    console.log('isAuthenticated', auth.isAuthenticated);
+    
+    // if (auth.loading) {
+    //     return <div>Loading...</div>;
+    // }
 
     return (
         <AuthContext.Provider value={{ 

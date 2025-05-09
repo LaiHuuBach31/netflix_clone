@@ -5,27 +5,31 @@ import './index.css';
 import 'antd/dist/reset.css';
 import App from './App';
 import { ToastContainer, Bounce } from 'react-toastify';
+import { Provider } from 'react-redux';
+import store from './store';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  < BrowserRouter>
-    <App />
-    <ToastContainer
-      position="top-right"
-      autoClose={5000}
-      hideProgressBar={false}
-      newestOnTop={false}
-      closeOnClick={false}
-      rtl={false}
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme="light"
-      transition={Bounce}
-    />
-  </BrowserRouter>
+  <Provider store={store}>
+    < BrowserRouter>
+      <App />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+    </BrowserRouter>
+  </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function
