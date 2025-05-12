@@ -16,7 +16,8 @@ const AdminRoute = [
         element: <AdminLayout />,  
         children: [
           { index: true, element: <OverviewPage /> },  
-          { path: 'genres', element: <GenrePage /> },  
+
+          { path: 'genres', element: <GenrePage /> },              
           { path: 'users', element: <UsersPage /> },  
           { path: 'orders', element: <OrdersPage /> }, 
           { path: 'settings', element: <SettingsPage /> },

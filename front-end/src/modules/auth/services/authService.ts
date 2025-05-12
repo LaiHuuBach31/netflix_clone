@@ -54,7 +54,6 @@ interface Response {
 const authService = {
     // login
     login: async (data: LoginRequest): Promise<AuthResponse> => {
-        console.log('login service');
         
         const response = await api.post<AuthResponse>('/login', data);
 

@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { showWarningToast } from '../utils/toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuth } from '../store/slices/authSlice';
@@ -37,9 +36,6 @@ const ProtectedRoute: React.FC = () => {
 
   console.log('isAdminRoute', isAdminRoute);
   console.log('!hasAdminRole', !hasAdminRole);
-
-
-
 
   return <Outlet />;
 

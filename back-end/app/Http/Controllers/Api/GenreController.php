@@ -15,9 +15,10 @@ class GenreController extends BaseController
         $this->genreService = $genreService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->handleIndex($this->genreService);
+        $serach = $request->search;
+        return $this->handleIndex($this->genreService, 'name', $serach);
     }
 
     public function show(int $id)

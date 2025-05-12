@@ -102,7 +102,8 @@ export const loginAsync = createAsyncThunk('auth/login', async (credentials: Log
         console.log('API Response:', response);
         const { access_token, refresh_token, user } = response.data;
         localStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);
+        localStorage.setItem('refresh_token', refresh_token);                
+        // localStorage.setItem('user', JSON.stringify(response.data.user));
         console.log('User from API:', user);
 
         if (!user) {
@@ -125,6 +126,7 @@ export const logoutAsync = createAsyncThunk('auth/logout', async (_, { rejectWit
         await authService.logout();
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        // localStorage.removeItem('user');
         return true;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || 'Logout failed');

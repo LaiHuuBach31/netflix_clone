@@ -1,21 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from "framer-motion";
 import Header from '../components/common/Header'
 import StatCard from '../components/common/StatCard';
-import { CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import GenreTable from '../components/genres/GenreTable';
-import OrderDistribution from '../components/orders/OrderDistribution';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 
-const orderStats = {
-	totalOrders: "1,234",
-	pendingOrders: "56",
-	completedOrders: "1,178",
-	totalRevenue: "$98,765",
-};
+const GenrePage:React.FC = () => {
 
-
-const GenrePage = () => {
+	const {response} = useSelector((state:RootState) => state.genre);
+	console.log(response);
+	
+	const totalGenres = response?.total ?? 0;
+	
 	return (
 		<div className='flex-1 relative z-10 overflow-auto'>
 				<Header title={"Genres"} />
@@ -27,15 +26,8 @@ const GenrePage = () => {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 1 }}
 					>
-						<StatCard name='Total Orders' icon={ShoppingCartOutlined} value={orderStats.totalOrders} color='#6366F1' />
-						<StatCard name='Pending Orders' icon={ClockCircleOutlined} value={orderStats.pendingOrders} color='#F59E0B' />
-						<StatCard
-							name='Completed Orders'
-							icon={CheckCircleOutlined}
-							value={orderStats.completedOrders}
-							color='#10B981'
-						/>
-						<StatCard name='Total Revenue' icon={DollarCircleOutlined} value={orderStats.totalRevenue} color='#EF4444' />
+						<StatCard name='Total Genres' icon={ShoppingCartOutlined} value={totalGenres.toString()} color='#6366F1' />
+
 					</motion.div>
 
 					<GenreTable />
