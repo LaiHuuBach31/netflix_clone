@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 const SIDEBAR_ITEMS = [
 	{ name: "Overview", icon: BarChartOutlined, color: "#6366f1", href: "/admin" },
 	{ name: "Genres", icon: AppstoreOutlined, color: "#6366f1", href: "/admin/genres" },
+	{ name: "Menus", icon: MenuOutlined, color: "#6366f1", href: "/admin/menus" },
 	{ name: "Users", icon: UsergroupAddOutlined, color: "#EC4899", href: "/admin/users" },
 	{ name: "Orders", icon: ShoppingCartOutlined, color: "#F59E0B", href: "/admin/orders" },
 	{ name: "Settings", icon: SettingOutlined, color: "#6EE7B7", href: "/admin/settings" },

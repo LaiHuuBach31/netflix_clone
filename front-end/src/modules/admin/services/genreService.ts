@@ -69,7 +69,7 @@ const genreService = {
 
     getGenreById: async (id: number): Promise<SingleGenreResponse> => {
         try {
-            const response = await api.get<SingleGenreResponse>(`/genre/${id}`);
+            const response = await api.get<SingleGenreResponse>(`/genres/${id}`);
             return response.data;
         } catch (error: any) {
             throw error.response?.data as ErrorResponse || 'Failed to get genres by id';
@@ -81,7 +81,7 @@ const genreService = {
             const response = await api.post<SingleGenreResponse>('genres', data);
             return response.data;
         } catch (error: any) {
-            throw error.response?.data as ErrorResponse;
+            throw error.response?.data as ErrorResponse || "Failed to create genre";
         }
     },
 
@@ -90,7 +90,7 @@ const genreService = {
             const response = await api.put<SingleGenreResponse>(`/genres/${id}`, data);
             return response.data;
         } catch (error: any) {
-            throw error.response?.data as ErrorResponse;
+            throw error.response?.data as ErrorResponse || "Failed to update genre";
         }
     },
 

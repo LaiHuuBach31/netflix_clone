@@ -1,62 +1,67 @@
+import React, { useCallback, useEffect, useState } from 'react'
 import { motion } from "framer-motion";
-import { EditOutlined, SearchOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../store";
-import { deleteGenre, fetchGenres } from "../../store/genreSlice";
-import debounce from "lodash/debounce";
-import GenreAdd from "./GenreAdd";
-import GenreEdit from "./GenreEdit";
-import { Genre } from "../../services/genreService";
-import { Button, Modal } from "antd";
-import { showSuccessToast } from "../../../../utils/toast";
+import { DeleteOutlined, EditOutlined, PlusSquareOutlined, SearchOutlined } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../../store';
+import { deleteMenu, fetchMenus } from '../../store/menuSlice';
+import { debounce } from 'lodash';
+import { Menu } from '../../services/menuService';
+import MenuAdd from './MenuAdd';
+import MenuEdit from './MenuEdit';
+import MenuChidren from './MenuChidren';
+import { Button, Modal } from 'antd';
+import { showSuccessToast } from '../../../../utils/toast';
 
-const GenreTable: React.FC = () => {
-    const [searchGenre, setSearchGenre] = useState("");
+const MenuTable: React.FC = () => {
+    console.log('MenuTable');
+
+    const [searchMenu, setSearchMenu] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null);
+    const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
     const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
-    const [genreToDeleteId, setGenreToDeleteId] = useState<number | null>(null);
+    const [menuToDeleteId, setMenuToDeleteId] = useState<number | null>(null);
+    const [selectedParentId, setSelectedParentId] = useState<number | null>(null);
     const dispatch = useDispatch<AppDispatch>();
-    const { response, loading, error } = useSelector((state: RootState) => state.genre);
-    const [currentPage, setCurrentPage] = useState(1);
+    const { response } = useSelector((state: RootState) => state.menu);
 
-    const debouncedFetchGenres = useCallback(
+    console.log('response', response);
+
+    const debounceFetchMenus = useCallback(
         debounce((page, keyword) => {
-            dispatch(fetchGenres({ page, keyword }));
+            dispatch(fetchMenus({ page, keyword }));
         }, 500),
         [dispatch]
     );
 
     useEffect(() => {
-        debouncedFetchGenres(currentPage, searchGenre);
+        debounceFetchMenus(currentPage, searchMenu);
         return () => {
-            debouncedFetchGenres.cancel();
-        };
-    }, [currentPage, searchGenre, debouncedFetchGenres]);
+            debounceFetchMenus.cancel();
+        }
+    }, [currentPage, searchMenu, debounceFetchMenus]);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchGenre(e.target.value);
+        setSearchMenu(e.target.value);
         setCurrentPage(1);
-    };
-
-    // pagination
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-    };
+    }
 
     const handlePrevious = () => {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
-    };
+    }
 
     const handleNext = () => {
         if (response && currentPage < response.last_page) {
             setCurrentPage(currentPage + 1);
         }
-    };
+    }
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    }
 
     const renderPageNumbers = () => {
         if (!response) return null;
@@ -83,11 +88,12 @@ const GenreTable: React.FC = () => {
         let startPage = Math.max(1, currentPage - 1);
         let endPage = Math.min(totalPages, currentPage + 1);
 
-        if (endPage - startPage < maxPagesToShow - 1 && endPage < totalPages) {
+        if (endPage - startPage < maxPagesToShow && endPage < totalPages) {
             startPage = Math.max(1, endPage - maxPagesToShow + 1);
         }
+
         if (startPage > 1) {
-            startPage = Math.max(1, currentPage - 1);
+            startPage = Math.max(1, currentPage - 1)
         }
 
         for (let i = startPage; i < endPage; i++) {
@@ -99,7 +105,7 @@ const GenreTable: React.FC = () => {
                 >
                     {i}
                 </button>
-            );
+            )
         }
 
         if (currentPage < totalPages - 1) {
@@ -118,51 +124,56 @@ const GenreTable: React.FC = () => {
         }
 
         return pages;
-    };
+    }
 
-    // add
+    //add
     const showModalAdd = () => {
         setIsAddModalOpen(true);
-    };
+    }
 
     const handleAddModalClose = () => {
         setIsAddModalOpen(false);
     };
 
     // edit
-    const showEditModal = (genre: Genre) => {
-        setSelectedGenre(genre);
+    const showEditModal = (menu: Menu) => {
+        setSelectedMenu(menu);
         setIsEditModalOpen(true);
     };
 
     const handleEditModalClose = () => {
         setIsEditModalOpen(false);
-        setSelectedGenre(null);
+        setSelectedMenu(null);
     };
 
     // Delete
     const showDeleteConfirmModal = (id: number) => {
-        setGenreToDeleteId(id);
+        setMenuToDeleteId(id);
         setIsDeleteConfirmModalOpen(true);
     };
 
     const handleDeleteConfirm = () => {
-        if (genreToDeleteId) {
-            dispatch(deleteGenre(genreToDeleteId))
+        if (menuToDeleteId) {
+            dispatch(deleteMenu(menuToDeleteId))
                 .unwrap()
                 .then(() => {
                     showSuccessToast('Genre deleted successfully');
                 })
-            dispatch(fetchGenres({ page: currentPage, keyword: searchGenre }));
+            dispatch(fetchMenus({ page: currentPage, keyword: searchMenu }));
         }
         setIsDeleteConfirmModalOpen(false);
 
-        setGenreToDeleteId(null);
+        setMenuToDeleteId(null);
     };
 
     const handleDeleteCancel = () => {
         setIsDeleteConfirmModalOpen(false);
-        setGenreToDeleteId(null);
+        setMenuToDeleteId(null);
+    };
+
+    // Hiển thị menu con/cháu
+    const showChildren = (parentId: number) => {
+        setSelectedParentId(parentId);
     };
 
     return (
@@ -173,7 +184,7 @@ const GenreTable: React.FC = () => {
             transition={{ delay: 0.2 }}
         >
             <div className="flex justify-between items-center mb-6 items-center">
-                <h2 className="text-xl font-semibold text-gray-100">Genres List</h2>
+                <h2 className="text-xl font-semibold text-gray-100">Menu List</h2>
 
                 <div className="relative">
                     <input
@@ -181,7 +192,7 @@ const GenreTable: React.FC = () => {
                         placeholder="Search genres..."
                         className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onChange={handleSearch}
-                        value={searchGenre}
+                        value={searchMenu}
                     />
                     <SearchOutlined className="absolute left-3 top-2.5 text-gray-400" style={{ fontSize: 18 }} />
                 </div>
@@ -197,7 +208,10 @@ const GenreTable: React.FC = () => {
                     <thead>
                         <tr>
                             <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                Index
+                                .
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                Order
                             </th>
                             <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
                                 Name
@@ -211,28 +225,36 @@ const GenreTable: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700">
-                        {response?.data.map((genre, key) => (
+                        {response?.data.filter((menu) => menu.parent_id == 0).map((menu, key) => (
                             <motion.tr
-                                key={genre.id}
+                                key={menu.id}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.3 }}
                             >
+                                <td className='px-6 py-3 text-center'>
+                                    <button
+                                        className="text-green-400 hover:text-green-300"
+                                        onClick={() => showChildren(menu.id)}
+                                    >
+                                        <PlusSquareOutlined />
+                                    </button>
+                                </td>
                                 <td className="px-6 py-3 text-center">{key + 1}</td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
-                                    {genre.name}
+                                    {menu.title}
                                 </td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
-                                    {genre.status ? 'Active' : 'Inactive'}
+                                    {menu.is_active ? 'Active' : 'Inactive'}
                                 </td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-300">
                                     <button className="text-indigo-400 hover:text-indigo-300 mr-2"
-                                        onClick={() => showEditModal(genre)}
+                                        onClick={() => showEditModal(menu)}
                                     >
                                         <EditOutlined style={{ fontSize: 18 }} />
                                     </button>
                                     <button className="text-red-400 hover:text-red-300"
-                                        onClick={() => showDeleteConfirmModal(genre.id)}
+                                        onClick={() => showDeleteConfirmModal(menu.id)}
                                     >
                                         <DeleteOutlined style={{ fontSize: 18 }} />
                                     </button>
@@ -262,16 +284,24 @@ const GenreTable: React.FC = () => {
                 )}
             </div>
 
-            <GenreAdd isModalOpen={isAddModalOpen} onClose={handleAddModalClose} />
+            <MenuAdd isModalOpen={isAddModalOpen} onClose={handleAddModalClose} />
             {
-                selectedGenre !== null && (
-                    <GenreEdit
+                selectedMenu !== null && (
+                    <MenuEdit
                         isModalOpen={isEditModalOpen}
                         onClose={handleEditModalClose}
-                        genre={selectedGenre}
+                        menu={selectedMenu}
                     />
                 )
             }
+
+            {selectedParentId !== null && (
+                <MenuChidren
+                    isModalOpen={selectedParentId !== null}
+                    onClose={() => setSelectedParentId(null)}
+                    parentId={selectedParentId}
+                />
+            )}
 
             <Modal
                 title="Confirm Deletion"
@@ -289,17 +319,16 @@ const GenreTable: React.FC = () => {
                         key="confirm"
                         type="primary"
                         onClick={handleDeleteConfirm}
-                        loading={loading}
                     >
                         Yes
                     </Button>,
                 ]}
             >
-                <p>Are you sure you want to delete this genre?</p>
+                <p>Are you sure you want to delete this menu?</p>
             </Modal>
 
         </motion.div>
     );
-};
+}
 
-export default GenreTable;
+export default MenuTable

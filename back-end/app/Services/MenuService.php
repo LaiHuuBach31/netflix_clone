@@ -15,7 +15,8 @@ class MenuService extends BaseService{
 
     public function getAll(?string $key = null ,?string $search = null, int $perPage = 10) {
         $menus = parent::getAll($key, $search, $perPage);
-        return $menus->map(fn($menu) => MenuMapper::fromModel($menu));
+        $menus->getCollection()->transform(fn($menu) => GenreMapper::fromModel($menu));
+        return $menus;
     }
 
     public function findById($id) {

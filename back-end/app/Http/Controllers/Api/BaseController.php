@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
-abstract class BaseController
+abstract class BaseController extends Controller
 {
     use ApiResponses;
 

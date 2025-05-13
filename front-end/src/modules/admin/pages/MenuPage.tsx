@@ -1,22 +1,20 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { motion } from "framer-motion";
-import Header from '../components/common/Header'
+import MenuTable from '../components/menu/MenuTable';
 import StatCard from '../components/common/StatCard';
-import GenreTable from '../components/genres/GenreTable';
+import Header from '../components/common/Header';
+import { MenuOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
-import { AppstoreOutlined } from '@ant-design/icons';
 
+const MenuPage:React.FC = () => {
 
-const GenrePage:React.FC = () => {
-
-	const {response} = useSelector((state:RootState) => state.genre);
-	
-	const totalGenres = response?.total ?? 0;
+	const { response } = useSelector((state: RootState) => state.menu);
+	const totalMenus = response?.total ?? 0;	
 	
 	return (
 		<div className='flex-1 relative z-10 overflow-auto'>
-				<Header title={"Genres"} />
+				<Header title={"Menus"} />
 
 				<main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
 					<motion.div
@@ -25,12 +23,11 @@ const GenrePage:React.FC = () => {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 1 }}
 					>
-						<StatCard name='Total Genres' icon={AppstoreOutlined} value={totalGenres.toString()} color='#6366F1' />
-
+						<StatCard name='Total Menus' icon={MenuOutlined} value={totalMenus} color='#6366F1' />
 
 					</motion.div>
 
-					<GenreTable />
+					<MenuTable />
 
 				</main>
 
@@ -40,4 +37,4 @@ const GenrePage:React.FC = () => {
 	)
 }
 
-export default GenrePage
+export default MenuPage

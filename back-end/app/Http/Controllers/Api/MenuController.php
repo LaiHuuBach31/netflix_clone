@@ -21,7 +21,7 @@ class MenuController extends BaseController
     {
         $search = $request->query('search');
         $perPage = $request->query('per_page', 10);
-        return $this->handleIndex($this->menuService, 'name', $search, $perPage);
+        return $this->handleIndex($this->menuService, 'title', $search, $perPage);
     }
 
     public function show(int $id) {
