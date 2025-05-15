@@ -1,81 +1,114 @@
-import React, { useEffect, useMemo } from "react";
-import { Button, Modal, Tree } from "antd";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../store";
-import { fetchMenus } from "../../store/menuSlice";
+import React from "react";
+import { Button, Modal } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Menu } from "../../services/menuService";
+
+interface MenuWithChildren extends Menu {
+  children?: MenuWithChildren[];
+}
 
 interface MenuChidrenProps {
   isModalOpen: boolean;
   onClose: () => void;
-  parentId: number;
+  parentName: string;
+  menus: MenuWithChildren[];
+  onEdit: (menu: Menu) => void;
+  onDelete: (id: number) => void;
 }
 
-const MenuChidren: React.FC<MenuChidrenProps> = ({ isModalOpen, onClose, parentId }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { response } = useSelector((state: RootState) => state.menu);
-
-  useEffect(() => {
-    if (isModalOpen) {
-      dispatch(fetchMenus({ page: 1, keyword: "" }));
-    }
-  }, [isModalOpen, dispatch]);
-
-  // Hàm đệ quy để lấy con và cháu
-  const getChildren = (parentId: number, menus: Menu[]): any[] => {
-    return menus
-      .filter((menu) => menu.parent_id === parentId)
-      .map((menu) => ({
-        title: menu.title,
-        key: menu.id,
-        children: getChildren(menu.id, menus),
-      }));
-  };
-
-  const buildTreeData = useMemo(() => {
-    if (!response?.data) return [];
-    const treeData: any[] = [];
-    // Lấy menu cha dựa trên parentId
-    const parentMenu = response.data.find((menu) => menu.id === parentId);
-    if (parentMenu) {
-      const children = getChildren(parentMenu.id, response.data);
-      treeData.push({
-        title: parentMenu.title,
-        key: parentMenu.id,
-        children: children,
-      });
-    }
-    return treeData;
-  }, [response?.data, parentId]);
-
-  const handleOk = () => {
-    onClose();
-  };
+const MenuItemRow: React.FC<{
+  menu: MenuWithChildren;
+  level: number;
+  onEdit: (menu: Menu) => void;
+  onDelete: (id: number) => void;
+}> = ({ menu, level, onEdit, onDelete }) => {
+  const indent = "— ".repeat(level);
+  const marginLeft = `${level * 30}px`;
 
   return (
+    <>
+      <tr key={menu.id}>
+        <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-black text-start">
+          <span style={{ marginLeft, display: "inline-block" }}>
+            {indent} {menu.title}
+          </span>
+        </td>
+        <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-black">
+          {menu.is_active ? "Active" : "Inactive"}
+        </td>
+        <td className="px-6 py-4 text-center whitespace-nowrap text-sm">
+          <button
+            className="text-indigo-400 hover:text-indigo-300 mr-2"
+            onClick={() => onEdit(menu)}
+          >
+            <EditOutlined style={{ fontSize: 18 }} />
+          </button>
+          <button
+            className="text-red-400 hover:text-red-300"
+            onClick={() => onDelete(menu.id)}
+          >
+            <DeleteOutlined style={{ fontSize: 18 }} />
+          </button>
+        </td>
+      </tr>
+      {menu.children &&
+        menu.children.map((child) => (
+          <MenuItemRow
+            key={child.id}
+            menu={child}
+            level={level + 1}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+    </>
+  );
+};
+
+const MenuChidren: React.FC<MenuChidrenProps> = ({
+  isModalOpen,
+  onClose,
+  parentName,
+  menus,
+  onEdit,
+  onDelete,
+}) => {
+  return (
     <Modal
-      title="Menu Children"
+      title={`Children of Menu: ${parentName}`}
       open={isModalOpen}
-      onOk={handleOk}
       onCancel={onClose}
-      closable
-      okText="Close"
-      cancelText="Cancel"
-      footer={[
-        <Button key="cancel" onClick={onClose}>
-          Cancel
-        </Button>,
-        <Button key="close" type="primary" onClick={handleOk}>
-          Close
-        </Button>,
-      ]}
+      footer={null}
+      width={800}
     >
-      <Tree
-        treeData={buildTreeData}
-        defaultExpandAll
-        showLine={{ showLeafIcon: false }}
-        style={{ marginTop: 16 }}
-      />
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-700">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 text-center text-xs font-medium text-black uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-black uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-black uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-700 text-start!">
+            {menus.map((menu) => (
+              <MenuItemRow
+                key={menu.id}
+                menu={menu}
+                level={0}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Modal>
   );
 };

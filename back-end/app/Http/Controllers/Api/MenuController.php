@@ -20,7 +20,7 @@ class MenuController extends BaseController
     public function index(Request $request)
     {
         $search = $request->query('search');
-        $perPage = $request->query('per_page', 10);
+        $perPage = $request->query('per_page', 100);
         return $this->handleIndex($this->menuService, 'title', $search, $perPage);
     }
 

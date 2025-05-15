@@ -18,7 +18,7 @@ const initialState: MenuState = {
 export const fetchMenus = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
     'menu/fetchMenus',
     async ({ page = 1, keyword = '' }, { rejectWithValue }) => {
-        try {
+        try {            
             const response = await menuService.getMenus(page, keyword);
             return response.data;
         } catch (error: any) {

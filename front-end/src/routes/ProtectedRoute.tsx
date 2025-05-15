@@ -12,7 +12,6 @@ const ProtectedRoute: React.FC = () => {
   const access_token = localStorage.getItem('access_token');
   const refresh_token = localStorage.getItem('refresh_token');
   const location = useLocation();
-  console.log('isAuthenticated', isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated && !user && !loading) {
@@ -33,9 +32,6 @@ const ProtectedRoute: React.FC = () => {
   if (!access_token && !refresh_token) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-
-  console.log('isAdminRoute', isAdminRoute);
-  console.log('!hasAdminRole', !hasAdminRole);
 
   return <Outlet />;
 
