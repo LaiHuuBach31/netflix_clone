@@ -1,47 +1,48 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import menuService, { DataResponse, ErrorResponse, Menu, SingleMenuResponse, CreateMenuPayload } from "../services/menuService";
+import planService, { CreatePayload, DataResponse, ErrorResponse, Plan, SingleResponse } from "../services/planService";
 
-interface MenuState {
+interface PlanState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedMenu: Menu | SingleMenuResponse | null;
+    selectedPlan: Plan | SingleResponse | null;
 }
 
-const initialState: MenuState = {
+const initialState: PlanState = {
     response: null,
     loading: false,
     error: null,
-    selectedMenu: null,
+    selectedPlan: null,
 }
 
-export const fetchMenus = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
-    'menu/fetchMenus',
+export const fetchPlans = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
+    'genre/fetchPlans',
     async ({ page = 1, keyword = '' }, { rejectWithValue }) => {
         try {
-            const response = await menuService.getMenus(page, keyword);
+            const response = await planService.getPlans(page, keyword);
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error || 'Failed to fetch menus');
+            return rejectWithValue(error || 'Failed to fetch plans');
         }
-    })
+    }
+)
 
-export const fetchMenuById = createAsyncThunk<Menu, number, { rejectValue: ErrorResponse }>(
-    'menu/fetchMenuById',
+export const fetchPlanById = createAsyncThunk<Plan, number, { rejectValue: ErrorResponse }>(
+    'plan/fetchPlanById',
     async (id: number, { rejectWithValue }) => {
         try {
-            const response = await menuService.getMenuById(id);
+            const response = await planService.getPlanById(id);
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error || 'Failed to fetch menu by id');
+            return rejectWithValue(error || 'Failed to fetch plan by id');
         }
     })
 
-export const createMenu = createAsyncThunk<SingleMenuResponse, CreateMenuPayload, { rejectValue: ErrorResponse }>(
-    'menu/createMenu',
+export const createPlan = createAsyncThunk<SingleResponse, CreatePayload, { rejectValue: ErrorResponse }>(
+    'plan/createPlan',
     async (payload, { rejectWithValue }) => {
         try {
-            const response = await menuService.createMenu(payload);
+            const response = await planService.createPlan(payload);
             return response;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -49,11 +50,11 @@ export const createMenu = createAsyncThunk<SingleMenuResponse, CreateMenuPayload
     }
 )
 
-export const updateMenu = createAsyncThunk<SingleMenuResponse, { id: number, data: Partial<Menu> }, { rejectValue: ErrorResponse }>(
-    'menu/updateMenu',
+export const updatePlan = createAsyncThunk<SingleResponse, { id: number, data: Partial<Plan> }, { rejectValue: ErrorResponse }>(
+    'plan/updatePlan',
     async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await menuService.updateMenu(id, data);
+            const response = await planService.updatePlan(id, data);
             return response;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -61,11 +62,13 @@ export const updateMenu = createAsyncThunk<SingleMenuResponse, { id: number, dat
     }
 )
 
-export const deleteMenu = createAsyncThunk<number, number, { rejectValue: ErrorResponse }>(
-    'menu/deleteMenu',
+export const deletePlan = createAsyncThunk<number, number, { rejectValue: ErrorResponse }>(
+    'plan/deletePlan',
     async (id, { rejectWithValue }) => {
         try {
-            await menuService.deleteMenu(id);
+            const response = await planService.deletePlan(id);
+            console.log(response);
+            
             return id;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -73,96 +76,96 @@ export const deleteMenu = createAsyncThunk<number, number, { rejectValue: ErrorR
     }
 );
 
-const menuSlice = createSlice({
-    name: 'menu',
+const planSlice = createSlice({
+    name: 'plan',
     initialState: initialState,
     reducers: {
-        setSelectedMenu(state, action: { payload: Menu | null }) {
-            state.selectedMenu = action.payload;
+        setSelectedPlan(state, action: { payload: Plan | null }) {
+            state.selectedPlan = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder
             // fetch
-            .addCase(fetchMenus.pending, (state) => {
+            .addCase(fetchPlans.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchMenus.fulfilled, (state, action) => {
+            .addCase(fetchPlans.fulfilled, (state, action) => {
                 state.loading = false;
                 state.response = action.payload;
             })
-            .addCase(fetchMenus.rejected, (state, action) => {
+            .addCase(fetchPlans.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // fetch by id
-            .addCase(fetchMenuById.pending, (state) => {
+            .addCase(fetchPlanById.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchMenuById.fulfilled, (state, action) => {
+            .addCase(fetchPlanById.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedMenu = action.payload;
+                state.selectedPlan = action.payload;
             })
-            .addCase(fetchMenuById.rejected, (state, action) => {
+            .addCase(fetchPlanById.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // create
-            .addCase(createMenu.pending, (state) => {
+            .addCase(createPlan.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(createMenu.fulfilled, (state, action) => {
+            .addCase(createPlan.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedMenu = action.payload;
+                state.selectedPlan = action.payload;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }
             })
-            .addCase(createMenu.rejected, (state, action) => {
+            .addCase(createPlan.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // update
-            .addCase(updateMenu.pending, (state) => {
+            .addCase(updatePlan.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(updateMenu.fulfilled, (state, action) => {
+            .addCase(updatePlan.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedMenu = action.payload.data;
+                state.selectedPlan = action.payload.data;
                 if (state.response) {
                     const index = state.response.data.findIndex((genre) => genre.id === action.payload.data.id);
                     if (index !== -1) state.response.data[index] = action.payload.data;
                 }
             })
-            .addCase(updateMenu.rejected, (state, action) => {
+            .addCase(updatePlan.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // delete
-            .addCase(deleteMenu.pending, (state) => {
+            .addCase(deletePlan.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(deleteMenu.fulfilled, (state, action) => {
+            .addCase(deletePlan.fulfilled, (state, action) => {
                 state.loading = false;
                 if (state.response) {
-                    state.response.data = state.response.data.filter((genre) => genre.id !== action.payload);
+                    state.response.data = state.response.data.filter((plan) => plan.id !== action.payload);
                 }
             })
-            .addCase(deleteMenu.rejected, (state, action) => {
+            .addCase(deletePlan.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             });
     }
 });
 
-export const { } = menuSlice.actions;
-export default menuSlice.reducer;
+export const {} = planSlice.actions;
+export default planSlice.reducer;

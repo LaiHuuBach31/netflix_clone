@@ -6,6 +6,7 @@ import OrdersPage from "../pages/OrdersPage";
 import SettingsPage from "../pages/SettingsPage";
 import GenrePage from "../pages/GenrePage";
 import MenuPage from "../pages/MenuPage";
+import PlanPage from "../pages/PlanPage";
 
 
 const AdminRoute = [
@@ -19,6 +20,7 @@ const AdminRoute = [
           { index: true, element: <OverviewPage /> },  
           { path: 'genres', element: <GenrePage /> },              
           { path: 'menus', element: <MenuPage /> },              
+          { path: 'plans', element: <PlanPage /> },              
           { path: 'users', element: <UsersPage /> },  
           { path: 'orders', element: <OrdersPage /> }, 
           { path: 'settings', element: <SettingsPage /> },

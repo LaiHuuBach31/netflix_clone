@@ -40,17 +40,6 @@ const GenreEdit: React.FC<GenreEditProps> = ({ isModalOpen, onClose, genre }) =>
                 onClose();
             })
             .catch((error: ErrorResponse) => {
-                if (error.errors && typeof error.errors === "object") {
-                    const formErrors = Object.keys(error.errors)
-                        .filter((key) => key in values)
-                        .map((key) => ({
-                            name: key as keyof FieldType,
-                            errors: error.errors![key],
-                        }));
-                    console.log("Form errors:", formErrors);
-                    form.setFields(formErrors);
-                }
-
                 const errorDetails = error.errors ? Object.values(error.errors).flat() : [];
                 const detailedError = errorDetails.length
                     ? errorDetails[0]

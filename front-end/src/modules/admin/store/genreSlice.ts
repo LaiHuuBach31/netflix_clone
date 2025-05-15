@@ -47,7 +47,7 @@ export const createGenre = createAsyncThunk<SingleGenreResponse, CreateGenrePayl
     'genre/createGenre',
     async (payload, { rejectWithValue }) => {
         try {
-            const response = await genreService.createGenre(payload);            
+            const response = await genreService.createGenre(payload);
             return response;
         } catch (error: any) {
             return rejectWithValue(error);

@@ -28,7 +28,7 @@ const MenuItemRow: React.FC<{
   const handleDelete = () => {
     onDelete(menu.id, () => {}); 
   };
-
+  
   return (
     <>
       <tr key={menu.id}>

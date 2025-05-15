@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
 import genreReducer from '../modules/admin/store/genreSlice';
 import menuReducer from '../modules/admin/store/menuSlice';
+import planReducer from '../modules/admin/store/planSlice';
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
     genre: genreReducer,
     menu: menuReducer,
+    plan: planReducer,
   },
 });
 
