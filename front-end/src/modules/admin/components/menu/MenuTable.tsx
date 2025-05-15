@@ -34,7 +34,6 @@ const MenuTable: React.FC = () => {
     const { response } = useSelector((state: RootState) => state.menu);
 
     console.log('response', response);
-    
 
     const debounceFetchMenus = useCallback(
         debounce((page, keyword) => {
@@ -47,7 +46,7 @@ const MenuTable: React.FC = () => {
         debounceFetchMenus(currentPage, searchMenu);
         return () => {
             debounceFetchMenus.cancel();
-        };        
+        };
     }, [currentPage, searchMenu, debounceFetchMenus]);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,19 +191,10 @@ const MenuTable: React.FC = () => {
         setSelectedParentId(parentId);
     };
 
-    // Tree
-    const buildMenuTree = (parentId: number, menus: Menu[]): MenuWithChildren[] => {
-        return menus
-            .filter((menu) => menu.parent_id === parentId)
-            .map((menu) => ({
-                ...menu,
-                children: buildMenuTree(menu.id, menus),
-            }));
-    };
-
     const getChildren = (parentId: number): MenuWithChildren[] => {
         if (!response?.data) return [];
-        return buildMenuTree(parentId, response.data);
+        const parentMenu = response.data.find((menu) => menu.id === parentId);
+        return parentMenu?.children || [];
     };
 
     const getParentName = (parentId: number): string => {
@@ -274,48 +264,46 @@ const MenuTable: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700">
-                        {response?.data
-                            .filter((menu) => menu.parent_id === 0)
-                            .map((menu, key) => (
-                                <motion.tr
-                                    key={menu.id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <td className="px-6 py-3 text-center">
-                                        {hasDescendants(menu.id) && (
-                                            <button
-                                                className="text-green-400 hover:text-green-300"
-                                                onClick={() => showChildren(menu.id)}
-                                            >
-                                                <PlusSquareOutlined />
-                                            </button>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-3 text-center">{key + 1}</td>
-                                    <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
-                                        {menu.title}
-                                    </td>
-                                    <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
-                                        {menu.is_active ? "Active" : "Inactive"}
-                                    </td>
-                                    <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-300">
+                        {response?.data.map((menu, index) => (
+                            <motion.tr
+                                key={menu.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <td className="px-6 py-3 text-center">
+                                    {hasDescendants(menu.id) && (
                                         <button
-                                            className="text-indigo-400 hover:text-indigo-300 mr-2"
-                                            onClick={() => showEditModal(menu)}
+                                            className="text-green-400 hover:text-green-300"
+                                            onClick={() => showChildren(menu.id)}
                                         >
-                                            <EditOutlined style={{ fontSize: 18 }} />
+                                            <PlusSquareOutlined />
                                         </button>
-                                        <button
-                                            className="text-red-400 hover:text-red-300"
-                                            onClick={() => showDeleteConfirmModal(menu.id)}
-                                        >
-                                            <DeleteOutlined style={{ fontSize: 18 }} />
-                                        </button>
-                                    </td>
-                                </motion.tr>
-                            ))}
+                                    )}
+                                </td>
+                                <td className="px-6 py-3 text-center">{menu.order}</td>
+                                <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
+                                    {menu.title}
+                                </td>
+                                <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
+                                    {menu.is_active ? "Active" : "Inactive"}
+                                </td>
+                                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-300">
+                                    <button
+                                        className="text-indigo-400 hover:text-indigo-300 mr-2"
+                                        onClick={() => showEditModal(menu)}
+                                    >
+                                        <EditOutlined style={{ fontSize: 18 }} />
+                                    </button>
+                                    <button
+                                        className="text-red-400 hover:text-red-300"
+                                        onClick={() => showDeleteConfirmModal(menu.id)}
+                                    >
+                                        <DeleteOutlined style={{ fontSize: 18 }} />
+                                    </button>
+                                </td>
+                            </motion.tr>
+                        ))}
                     </tbody>
                 </table>
                 {response && response.data.length > 0 && (

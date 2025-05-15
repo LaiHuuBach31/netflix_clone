@@ -6,6 +6,7 @@ export interface Menu {
     parent_id: number;
     order: number;
     is_active: boolean;
+    children?: Menu[];
 }
 
 export interface CreateMenuPayload {
