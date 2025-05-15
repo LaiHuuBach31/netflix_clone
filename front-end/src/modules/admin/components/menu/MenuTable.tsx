@@ -33,6 +33,9 @@ const MenuTable: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { response } = useSelector((state: RootState) => state.menu);
 
+    console.log('response', response);
+    
+
     const debounceFetchMenus = useCallback(
         debounce((page, keyword) => {
             dispatch(fetchMenus({ page, keyword }));
@@ -215,6 +218,8 @@ const MenuTable: React.FC = () => {
         return children.length > 0;
     };
 
+    const hasChildrenToDelete = menuToDeleteId ? hasDescendants(menuToDeleteId) : false;
+
     return (
         <motion.div
             className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mb-8"
@@ -373,6 +378,11 @@ const MenuTable: React.FC = () => {
                 ]}
             >
                 <p>Are you sure you want to delete this menu?</p>
+                {hasChildrenToDelete && (
+                    <p className="text-red-500 mt-2">
+                        Note: This menu has submenus, and they will also be deleted.
+                    </p>
+                )}
             </Modal>
         </motion.div>
     );

@@ -20,10 +20,14 @@ const MenuItemRow: React.FC<{
   menu: MenuWithChildren;
   level: number;
   onEdit: (menu: Menu) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number, closeModal: () => void) => void;
 }> = ({ menu, level, onEdit, onDelete }) => {
   const indent = "— ".repeat(level);
   const marginLeft = `${level * 30}px`;
+
+  const handleDelete = () => {
+    onDelete(menu.id, () => {}); 
+  };
 
   return (
     <>
@@ -45,7 +49,7 @@ const MenuItemRow: React.FC<{
           </button>
           <button
             className="text-red-400 hover:text-red-300"
-            onClick={() => onDelete(menu.id)}
+            onClick={handleDelete}
           >
             <DeleteOutlined style={{ fontSize: 18 }} />
           </button>
@@ -73,6 +77,10 @@ const MenuChidren: React.FC<MenuChidrenProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const handleDelete = (id: number, closeModal: () => void) => {
+    onClose();
+    onDelete(id);
+  };
   return (
     <Modal
       title={`Children of Menu: ${parentName}`}
@@ -103,7 +111,7 @@ const MenuChidren: React.FC<MenuChidrenProps> = ({
                 menu={menu}
                 level={0}
                 onEdit={onEdit}
-                onDelete={onDelete}
+                onDelete={handleDelete}
               />
             ))}
           </tbody>
