@@ -1,48 +1,48 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import planService, { CreatePayload, DataResponse, ErrorResponse, Plan, SingleResponse } from "../services/planService";
+import movieService, { CreatePayload, DataResponse, ErrorResponse, Movie, SingleResponse } from "../services/movieService";
 
-interface PlanState {
+interface MovieState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedPlan: Plan | SingleResponse | null;
+    selectedMovie: Movie | SingleResponse | null;
 }
 
-const initialState: PlanState = {
+const initialState: MovieState = {
     response: null,
     loading: false,
     error: null,
-    selectedPlan: null,
+    selectedMovie: null,
 }
 
-export const fetchPlans = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
-    'plan/fetchPlans',
+export const fetchMovies = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
+    'movie/fetchMovies',
     async ({ page = 1, keyword = '' }, { rejectWithValue }) => {
         try {
-            const response = await planService.getPlans(page, keyword);
+            const response = await movieService.getMovies(page, keyword);
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error || 'Failed to fetch plans');
+            return rejectWithValue(error || 'Failed to fetch movies');
         }
     }
 )
 
-export const fetchPlanById = createAsyncThunk<Plan, number, { rejectValue: ErrorResponse }>(
-    'plan/fetchPlanById',
+export const fetchMovieById = createAsyncThunk<Movie, number, { rejectValue: ErrorResponse }>(
+    'movie/fetchMovieById',
     async (id: number, { rejectWithValue }) => {
         try {
-            const response = await planService.getPlanById(id);
+            const response = await movieService.getMovieById(id);
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error || 'Failed to fetch plan by id');
+            return rejectWithValue(error || 'Failed to fetch movie by id');
         }
     })
 
-export const createPlan = createAsyncThunk<SingleResponse, CreatePayload, { rejectValue: ErrorResponse }>(
-    'plan/createPlan',
+export const createMovie = createAsyncThunk<SingleResponse, CreatePayload, { rejectValue: ErrorResponse }>(
+    'movie/createMovie',
     async (payload, { rejectWithValue }) => {
         try {
-            const response = await planService.createPlan(payload);
+            const response = await movieService.createMovie(payload);
             return response;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -50,11 +50,11 @@ export const createPlan = createAsyncThunk<SingleResponse, CreatePayload, { reje
     }
 )
 
-export const updatePlan = createAsyncThunk<SingleResponse, { id: number, data: Partial<Plan> }, { rejectValue: ErrorResponse }>(
-    'plan/updatePlan',
+export const updateMovie = createAsyncThunk<SingleResponse, { id: number, data: Partial<Movie> }, { rejectValue: ErrorResponse }>(
+    'movie/updateMovie',
     async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await planService.updatePlan(id, data);
+            const response = await movieService.updateMovie(id, data);
             return response;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -62,11 +62,11 @@ export const updatePlan = createAsyncThunk<SingleResponse, { id: number, data: P
     }
 )
 
-export const deletePlan = createAsyncThunk<number, number, { rejectValue: ErrorResponse }>(
-    'plan/deletePlan',
+export const deleteMovie = createAsyncThunk<number, number, { rejectValue: ErrorResponse }>(
+    'movie/deleteMovie',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await planService.deletePlan(id);
+            const response = await movieService.deleteMovie(id);
             console.log(response);
             
             return id;
@@ -76,96 +76,96 @@ export const deletePlan = createAsyncThunk<number, number, { rejectValue: ErrorR
     }
 );
 
-const planSlice = createSlice({
-    name: 'plan',
+const movieSlice = createSlice({
+    name: 'movie',
     initialState: initialState,
     reducers: {
-        setSelectedPlan(state, action: { payload: Plan | null }) {
-            state.selectedPlan = action.payload;
+        setSelectedMovie(state, action: { payload: Movie | null }) {
+            state.selectedMovie = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder
             // fetch
-            .addCase(fetchPlans.pending, (state) => {
+            .addCase(fetchMovies.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchPlans.fulfilled, (state, action) => {
+            .addCase(fetchMovies.fulfilled, (state, action) => {
                 state.loading = false;
                 state.response = action.payload;
             })
-            .addCase(fetchPlans.rejected, (state, action) => {
+            .addCase(fetchMovies.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // fetch by id
-            .addCase(fetchPlanById.pending, (state) => {
+            .addCase(fetchMovieById.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchPlanById.fulfilled, (state, action) => {
+            .addCase(fetchMovieById.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPlan = action.payload;
+                state.selectedMovie = action.payload;
             })
-            .addCase(fetchPlanById.rejected, (state, action) => {
+            .addCase(fetchMovieById.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // create
-            .addCase(createPlan.pending, (state) => {
+            .addCase(createMovie.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(createPlan.fulfilled, (state, action) => {
+            .addCase(createMovie.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPlan = action.payload;
+                state.selectedMovie = action.payload;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }
             })
-            .addCase(createPlan.rejected, (state, action) => {
+            .addCase(createMovie.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // update
-            .addCase(updatePlan.pending, (state) => {
+            .addCase(updateMovie.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(updatePlan.fulfilled, (state, action) => {
+            .addCase(updateMovie.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPlan = action.payload.data;
+                state.selectedMovie = action.payload.data;
                 if (state.response) {
                     const index = state.response.data.findIndex((genre) => genre.id === action.payload.data.id);
                     if (index !== -1) state.response.data[index] = action.payload.data;
                 }
             })
-            .addCase(updatePlan.rejected, (state, action) => {
+            .addCase(updateMovie.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // delete
-            .addCase(deletePlan.pending, (state) => {
+            .addCase(deleteMovie.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(deletePlan.fulfilled, (state, action) => {
+            .addCase(deleteMovie.fulfilled, (state, action) => {
                 state.loading = false;
                 if (state.response) {
-                    state.response.data = state.response.data.filter((plan) => plan.id !== action.payload);
+                    state.response.data = state.response.data.filter((movie) => movie.id !== action.payload);
                 }
             })
-            .addCase(deletePlan.rejected, (state, action) => {
+            .addCase(deleteMovie.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             });
     }
 });
 
-export const {} = planSlice.actions;
-export default planSlice.reducer;
+export const {} = movieSlice.actions;
+export default movieSlice.reducer;

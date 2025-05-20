@@ -29,8 +29,16 @@ class FileUploadService
 
     public function deleteFile(string $filePath): bool
     {
-        $path = str_replace(Storage::url(''), '', $filePath);
-        return Storage::disk('public')->delete($path);
+        try {
+            $relativePath = str_replace(Storage::url(''), '', $filePath);
+            if (Storage::disk('public')->exists($relativePath)) {
+                $deleted = Storage::disk('public')->delete($relativePath);
+                return $deleted;
+            }
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
     
 }

@@ -35,8 +35,6 @@ const GenrePage:React.FC = () => {
 				</main>
 
 			</div>
-		
-
 	)
 }
 

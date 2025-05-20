@@ -87,6 +87,7 @@ Route::group([
         Route::get('/preview', [FileUploadController::class, 'preview'])->middleware('check.permission:preview_upload');
         Route::post('/image', [FileUploadController::class, 'uploadImage'])->middleware('check.permission:upload_image');
         Route::post('/video', [FileUploadController::class, 'uploadVideo'])->middleware('check.permission:upload_video');
+        Route::delete('{filename}', [FileUploadController::class, 'deleteFile'])->middleware('check.permission:delete_file');
     });
 
     Route::group(['prefix' => 'menus', 'middleware' => ['auth:api']], function () {

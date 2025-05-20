@@ -35,7 +35,7 @@ class FileUploadController extends Controller
 
             $imageUrl = $this->fileUploadService->storeFile($request->file('file'), 'uploads/images');
 
-            return $this->successResponse($imageUrl,'Image uploaded successfully');
+            return $this->successResponse($imageUrl, 'Image uploaded successfully');
         } catch (\Exception $e) {
             return $this->errorResponse([], 'Failed to upload image: ' . $e->getMessage());
         }
@@ -43,9 +43,10 @@ class FileUploadController extends Controller
 
     public function uploadVideo(Request $request)
     {
+        // dd($request->file('file')->getMimeType());
         try {
             $validator = Validator::make($request->all(), [
-                'file' => 'required|mimes:mp4,mov,avi,mkv|max:102400',
+                'file' => 'required|mimes:mp4,mov,avi,mkv|max:204800',
             ]);
 
             if ($validator->fails()) {
@@ -54,10 +55,33 @@ class FileUploadController extends Controller
 
             $videoUrl = $this->fileUploadService->storeFile($request->file('file'), 'uploads/videos');
 
-            return $this->successResponse(['url' => $videoUrl], 'Video uploaded successfully');
-
+            return $this->successResponse($videoUrl, 'Video uploaded successfully');
         } catch (\Exception $e) {
             return $this->errorResponse([], 'Failed to upload video: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteFile(Request $request, $filename)
+    {
+        try {
+            $paths = [
+                'uploads/images/' . $filename,
+                'uploads/videos/' . $filename,
+            ];
+
+            $deleted = false;
+            foreach ($paths as $path) {
+                if (Storage::disk('public')->exists($path)) {
+                    $deleted = $this->fileUploadService->deleteFile($path);
+                    if ($deleted) {
+                        return $this->successResponse([], 'File deleted successfully');
+                    }
+                }
+            }
+
+            return $this->errorResponse([], 'File not found', 404);
+        } catch (\Exception $e) {
+            return $this->errorResponse([], 'Failed to delete file: ' . $e->getMessage(), 500);
         }
     }
 }

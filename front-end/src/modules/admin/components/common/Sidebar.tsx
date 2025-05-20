@@ -3,6 +3,7 @@ import {
 	BarChartOutlined,
 	ContainerOutlined,
 	MenuOutlined,
+	PlaySquareOutlined,
 	SettingOutlined,
 	ShoppingCartOutlined,
 	UsergroupAddOutlined,
@@ -16,6 +17,7 @@ const SIDEBAR_ITEMS = [
 	{ name: "Genres", icon: AppstoreOutlined, color: "#6366f1", href: "/admin/genres" },
 	{ name: "Menus", icon: MenuOutlined, color: "#6366f1", href: "/admin/menus" },
 	{ name: "Plans", icon: ContainerOutlined, color: "#6366f1", href: "/admin/plans" },
+	{ name: "Movies", icon: PlaySquareOutlined, color: "#6366f1", href: "/admin/movies" },
 	{ name: "Users", icon: UsergroupAddOutlined, color: "#EC4899", href: "/admin/users" },
 	{ name: "Orders", icon: ShoppingCartOutlined, color: "#F59E0B", href: "/admin/orders" },
 	{ name: "Settings", icon: SettingOutlined, color: "#6EE7B7", href: "/admin/settings" },
@@ -23,7 +25,6 @@ const SIDEBAR_ITEMS = [
 
 const Sidebar = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-	console.log("Sidebar rendered");
 	return (
 		<motion.div
 			className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarOpen ? "w-64" : "w-20"
@@ -45,8 +46,7 @@ const Sidebar = () => {
 					{SIDEBAR_ITEMS.map((item) => {
 						const Icon = item.icon;
 						return (
-							<>
-								
+							<>	
 								<Link key={item.href} to={item.href}>
 									<motion.div className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2'>
 										<Icon style={{ color: item.color, fontSize: 20, minWidth: 20 }} />

@@ -3,6 +3,8 @@ import authReducer from './slices/authSlice';
 import genreReducer from '../modules/admin/store/genreSlice';
 import menuReducer from '../modules/admin/store/menuSlice';
 import planReducer from '../modules/admin/store/planSlice';
+import uploadReducer from '../modules/admin/store/uploadSlice';
+import movieReducer from '../modules/admin/store/movieSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +12,8 @@ const store = configureStore({
     genre: genreReducer,
     menu: menuReducer,
     plan: planReducer,
+    upload: uploadReducer,
+    movie: movieReducer,
   },
 });
 
