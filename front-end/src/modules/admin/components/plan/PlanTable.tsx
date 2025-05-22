@@ -59,66 +59,68 @@ const PlanTable: React.FC = () => {
     };
 
     const renderPageNumbers = () => {
-        if (!response) return null;
+		if (!response) return null;
 
-        const pages = [];
-        const maxPagesToShow = 3;
-        const totalPages = response.last_page;
+		const pages = [];
+		const maxPagesToShow = 3;
+		const totalPages = response.last_page;
 
-        if (currentPage > 2) {
-            pages.push(
-                <button
-                    key={1}
-                    onClick={() => handlePageChange(1)}
-                    className={`pagination-btn ${currentPage === 1 ? "active" : ""}`}
-                >
-                    1
-                </button>
-            );
-            if (currentPage > 3) {
-                pages.push(<span key="start-ellipsis" className="pagination-ellipsis">...</span>);
-            }
-        }
+		if (currentPage > 2) {
+			pages.push(
+				<button
+					key={1}
+					onClick={() => handlePageChange(1)}
+					className={`pagination-btn ${currentPage === 1 ? "active" : ""}`}
+				>
+					1
+				</button>
+			);
+			if (currentPage > 3) {
+				pages.push(<span key="start-ellipsis" className="pagination-ellipsis">...</span>);
+			}
+		}
 
-        let startPage = Math.max(1, currentPage - 1);
-        let endPage = Math.min(totalPages, currentPage + 1);
+		let startPage = Math.max(1, currentPage - 1);
+		let endPage = Math.min(totalPages, currentPage + 1);
 
-        if (endPage - startPage < maxPagesToShow - 1 && endPage < totalPages) {
-            startPage = Math.max(1, endPage - maxPagesToShow + 1);
-        }
-        if (startPage > 1) {
-            startPage = Math.max(1, currentPage - 1);
-        }
+		if (endPage - startPage < maxPagesToShow - 1 && endPage < totalPages) {
+			startPage = Math.max(1, endPage - maxPagesToShow + 1);
+		}
+		if (startPage > 1) {
+			startPage = Math.max(1, currentPage - 1);
+		}
 
-        for (let i = startPage; i < endPage; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    onClick={() => handlePageChange(i)}
-                    className={`pagination-btn ${i === currentPage ? "active" : ""}`}
-                >
-                    {i}
-                </button>
-            );
-        }
+		for (let i = startPage; i <= endPage; i++) {
+			pages.push(
+				<button
+					key={i}
+					onClick={() => handlePageChange(i)}
+					className={`pagination-btn ${i === currentPage ? "active" : ""}`}
+				>
+					{i}
+				</button>
+			);
+		}
 
-        if (currentPage < totalPages - 1) {
-            if (endPage < totalPages - 1) {
-                pages.push(<span key="end-ellipsis" className="pagination-ellipsis">...</span>);
-            }
-            pages.push(
-                <button
-                    key={totalPages}
-                    onClick={() => handlePageChange(totalPages)}
-                    className={`pagination-btn ${currentPage === totalPages ? "active" : ""}`}
-                >
-                    {totalPages}
-                </button>
-            );
-        }
+		if (currentPage < totalPages) {
+			if (endPage < totalPages - 1) {
+				pages.push(<span key="end-ellipsis" className="pagination-ellipsis">...</span>);
+			}
+			if (endPage < totalPages) {
+				pages.push(
+					<button
+						key={totalPages}
+						onClick={() => handlePageChange(totalPages)}
+						className={`pagination-btn ${currentPage === totalPages ? "active" : ""}`}
+					>
+						{totalPages}
+					</button>
+				);
+			}
+		}
 
-        return pages;
-    };
+		return pages;
+	};
 
     // add
     const showModalAdd = () => {        

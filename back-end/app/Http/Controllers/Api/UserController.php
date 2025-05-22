@@ -25,21 +25,13 @@ class UserController extends BaseController
 
     public function show(int $id)
     {
-        $a = $this->handleShow($this->userService, $id);
         return $this->handleShow($this->userService, $id);
     }
 
     public function store(Request $request)
     {
-        $data = [
-            "name" => $request->name,
-            "avatar" => $request->avatar ,
-            "email" => $request->email ,
-            "password" => bcrypt($request->password),
-        ];
-
         try {
-            $user = $this->userService->createUser($data);
+            $user = $this->userService->createUser($request->all());
             return $this->createdResponse($user, 'User created successfully');
         } catch (ValidationException $e) {
             return $this->handleValidationException($e);
@@ -54,6 +46,7 @@ class UserController extends BaseController
                 "name" => $request->name,
                 "avatar" => $request->avatar,
                 "email" => $request->email ,
+                "status" => $request->status ,  
                 "password" => bcrypt($request->password),
             ]
         );

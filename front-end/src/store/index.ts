@@ -5,6 +5,7 @@ import menuReducer from '../modules/admin/store/menuSlice';
 import planReducer from '../modules/admin/store/planSlice';
 import uploadReducer from '../modules/admin/store/uploadSlice';
 import movieReducer from '../modules/admin/store/movieSlice';
+import userReducer from '../modules/admin/store/userSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     plan: planReducer,
     upload: uploadReducer,
     movie: movieReducer,
+    user: userReducer,
   },
 });
 

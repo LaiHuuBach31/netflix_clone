@@ -12,8 +12,9 @@ class GenreDTO extends BaseDTO {
     public function __construct(array $data, bool $validate = false) {
 
         if ($validate) {
+            $id = $data['id'] ?? null;
             $validator = Validator::make($data, [
-                'name' => 'required|unique:genres,name|string|max:225'
+                'name' => 'required|string|max:225|unique:genres,name,'. $id,
             ]);
 
             if ($validator->fails()) {

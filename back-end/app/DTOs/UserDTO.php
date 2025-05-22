@@ -8,10 +8,12 @@ class UserDTO extends BaseDTO{
     public function __construct(array $data, bool $validate = false) {
         
         if($validate){
+            $id = $data['id'] ?? null;
             $validator = Validator::make($data, [
                 'name' => 'required|string' ,
                 'avatar' => 'nullable' ,
-                'email' => 'required|unique:users,email|string' ,
+                'status' => 'required' ,
+                'email' => 'required|string|unique:users,email,'. $id ,
                 'password' => 'required|string',
             ]);
 

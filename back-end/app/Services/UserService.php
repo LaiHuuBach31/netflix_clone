@@ -1,11 +1,13 @@
 <?php
+
 namespace App\Services;
 
 use App\DTOs\UserDTO;
 use App\Mapper\UserMapper;
 use App\Repositories\UserRepository;
 
-class UserService extends BaseService{
+class UserService extends BaseService
+{
 
     public function __construct(UserRepository $userRepository)
     {
@@ -31,6 +33,7 @@ class UserService extends BaseService{
             'name' => $data['name'],
             'avatar' => $data['avatar'],
             'email' => $data['email'],
+            'status' => $data['status'],
             'password' => bcrypt($data['password']),
         ];
         $dto = new UserDTO($data, true);
@@ -40,12 +43,16 @@ class UserService extends BaseService{
 
     public function updateUser(int $id, array $data)
     {
-        $data = [
-            'name' => $data['name'],
-            'avatar' => $data['avatar'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password']),
-        ];
+        // $data = array_merge(
+        //     ['id' => $id],
+        //     [
+        //         'name' => $data['name'],
+        //         'avatar' => $data['avatar'],
+        //         'email' => $data['email'],
+        //         'status' => $data['status'],
+        //         'password' => bcrypt($data['password']),
+        //     ]
+        // );
         $dto = new UserDTO($data, true);
         $updated = parent::update($id, $dto);
         return UserMapper::fromModel($updated);

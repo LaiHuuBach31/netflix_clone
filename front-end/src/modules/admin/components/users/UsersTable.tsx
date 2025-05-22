@@ -1,26 +1,171 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Search from "antd/es/input/Search";
-
-const userData = [
-	{ id: 1, name: "John Doe", email: "john@example.com", role: "Customer", status: "Active" },
-	{ id: 2, name: "Jane Smith", email: "jane@example.com", role: "Admin", status: "Active" },
-	{ id: 3, name: "Bob Johnson", email: "bob@example.com", role: "Customer", status: "Inactive" },
-	{ id: 4, name: "Alice Brown", email: "alice@example.com", role: "Customer", status: "Active" },
-	{ id: 5, name: "Charlie Wilson", email: "charlie@example.com", role: "Moderator", status: "Active" },
-];
+import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import { User } from "../../services/userService";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../store";
+import { debounce } from "lodash";
+import { deleteUser, fetchUsers } from "../../store/userSlice";
+import { showSuccessToast } from "../../../../utils/toast";
+import { Button, Modal } from "antd";
+import UserAdd from "./UserAdd";
+import UserEdit from "./UserEdit";
 
 const UsersTable = () => {
-	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredUsers, setFilteredUsers] = useState(userData);
+	const [searchUser, setSearchUser] = useState("");
+	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+	const [selectedUser, setSelectedUser] = useState<User | null>(null);
+	const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
+	const [userToDeleteId, setUserToDeleteId] = useState<number | null>(null);
+	const dispatch = useDispatch<AppDispatch>();
+	const { response, loading, error } = useSelector((state: RootState) => state.user);
+	const [currentPage, setCurrentPage] = useState(1);
+	console.log('response', response);
+
+	const debouncedFetchUsers = useCallback(
+		debounce((page, keyword) => {
+			dispatch(fetchUsers({ page, keyword }));
+		}, 500),
+		[dispatch]
+	);
+
+	useEffect(() => {
+		debouncedFetchUsers(currentPage, searchUser);
+		return () => {
+			debouncedFetchUsers.cancel();
+		};
+	}, [currentPage, searchUser, debouncedFetchUsers]);
 
 	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const term = e.target.value.toLowerCase();
-		setSearchTerm(term);
-		const filtered = userData.filter(
-			(user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term)
-		);
-		setFilteredUsers(filtered);
+		setSearchUser(e.target.value);
+		setCurrentPage(1);
+	};
+
+	// pagination
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+	};
+
+	const handlePrevious = () => {
+		if (currentPage > 1) {
+			setCurrentPage(currentPage - 1);
+		}
+	};
+
+	const handleNext = () => {
+		if (response && currentPage < response.last_page) {
+			setCurrentPage(currentPage + 1);
+		}
+	};
+
+	const renderPageNumbers = () => {
+		if (!response) return null;
+
+		const pages = [];
+		const maxPagesToShow = 3;
+		const totalPages = response.last_page;
+
+		if (currentPage > 2) {
+			pages.push(
+				<button
+					key={1}
+					onClick={() => handlePageChange(1)}
+					className={`pagination-btn ${currentPage === 1 ? "active" : ""}`}
+				>
+					1
+				</button>
+			);
+			if (currentPage > 3) {
+				pages.push(<span key="start-ellipsis" className="pagination-ellipsis">...</span>);
+			}
+		}
+
+		let startPage = Math.max(1, currentPage - 1);
+		let endPage = Math.min(totalPages, currentPage + 1);
+
+		if (endPage - startPage < maxPagesToShow - 1 && endPage < totalPages) {
+			startPage = Math.max(1, endPage - maxPagesToShow + 1);
+		}
+		if (startPage > 1) {
+			startPage = Math.max(1, currentPage - 1);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			pages.push(
+				<button
+					key={i}
+					onClick={() => handlePageChange(i)}
+					className={`pagination-btn ${i === currentPage ? "active" : ""}`}
+				>
+					{i}
+				</button>
+			);
+		}
+
+		if (currentPage < totalPages) {
+			if (endPage < totalPages - 1) {
+				pages.push(<span key="end-ellipsis" className="pagination-ellipsis">...</span>);
+			}
+			if (endPage < totalPages) {
+				pages.push(
+					<button
+						key={totalPages}
+						onClick={() => handlePageChange(totalPages)}
+						className={`pagination-btn ${currentPage === totalPages ? "active" : ""}`}
+					>
+						{totalPages}
+					</button>
+				);
+			}
+		}
+
+		return pages;
+	};
+
+	// add
+	const showModalAdd = () => {
+		setIsAddModalOpen(true);
+	};
+
+	const handleAddModalClose = () => {
+		setIsAddModalOpen(false);
+	};
+
+	// edit
+	const showEditModal = (user: User) => {
+		setSelectedUser(user);
+		setIsEditModalOpen(true);
+	};
+
+	const handleEditModalClose = () => {
+		setIsEditModalOpen(false);
+		setSelectedUser(null);
+	};
+
+	// Delete
+	const showDeleteConfirmModal = (id: number) => {
+		setUserToDeleteId(id);
+		setIsDeleteConfirmModalOpen(true);
+	};
+
+	const handleDeleteConfirm = () => {
+		if (userToDeleteId) {
+			dispatch(deleteUser(userToDeleteId))
+				.unwrap()
+				.then(() => {
+					showSuccessToast('User deleted successfully');
+				})
+			dispatch(fetchUsers({ page: currentPage, keyword: searchUser }));
+		}
+		setIsDeleteConfirmModalOpen(false);
+
+		setUserToDeleteId(null);
+	};
+
+	const handleDeleteCancel = () => {
+		setIsDeleteConfirmModalOpen(false);
+		setUserToDeleteId(null);
 	};
 
 	return (
@@ -30,24 +175,33 @@ const UsersTable = () => {
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.2 }}
 		>
-			<div className='flex justify-between items-center mb-6'>
-				<h2 className='text-xl font-semibold text-gray-100'>Users</h2>
-				<div className='relative'>
+			<div className="flex justify-between items-center mb-6 items-center">
+				<h2 className="text-xl font-semibold text-gray-100">User List</h2>
+
+				<div className="relative">
 					<input
-						type='text'
-						placeholder='Search users...'
-						className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-						value={searchTerm}
+						type="text"
+						placeholder="Search user..."
+						className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 						onChange={handleSearch}
+						value={searchUser}
 					/>
-					<Search className='absolute left-3 top-2.5 text-gray-400' />
+					<SearchOutlined className="absolute left-3 top-2.5 text-gray-400" style={{ fontSize: 18 }} />
 				</div>
+
+				<button className="bg-[#2b3e59] px-5 py-2 font-semibold rounded-lg" onClick={showModalAdd}>
+					Add
+				</button>
+
 			</div>
 
 			<div className='overflow-x-auto'>
 				<table className='min-w-full divide-y divide-gray-700'>
 					<thead>
 						<tr>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Avater
+							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Name
 							</th>
@@ -67,13 +221,16 @@ const UsersTable = () => {
 					</thead>
 
 					<tbody className='divide-y divide-gray-700'>
-						{filteredUsers.map((user) => (
+						{response?.data.map((user) => (
 							<motion.tr
 								key={user.id}
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								transition={{ duration: 0.3 }}
 							>
+								<td className='px-6 py-4 whitespace-nowrap'>
+									<img src={user.avatar ?? 'https://cdn01.justjared.com/wp-content/uploads/headlines/2023/04/netflix-secret-menu-evergreen.jpg'} alt="" width={80} />
+								</td>
 								<td className='px-6 py-4 whitespace-nowrap'>
 									<div className='flex items-center'>
 										<div className='flex-shrink-0 h-10 w-10'>
@@ -92,31 +249,93 @@ const UsersTable = () => {
 								</td>
 								<td className='px-6 py-4 whitespace-nowrap'>
 									<span className='px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-800 text-blue-100'>
-										{user.role}
+										{Array.isArray(user.roles) && user.roles.length > 0 ? user.roles.map(role => role.name).join(", ") : "No Role"}
 									</span>
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap'>
 									<span
-										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-											user.status === "Active"
+										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+											${user.status == true
 												? "bg-green-800 text-green-100"
 												: "bg-red-800 text-red-100"
-										}`}
+											}`}
 									>
-										{user.status}
+										{user.status == true ? 'Active' : 'InActive'}
 									</span>
 								</td>
 
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									<button className='text-indigo-400 hover:text-indigo-300 mr-2'>Edit</button>
-									<button className='text-red-400 hover:text-red-300'>Delete</button>
+								<td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-300">
+									<button className="text-indigo-400 hover:text-indigo-300 mr-2"
+										onClick={() => showEditModal(user)}
+									>
+										<EditOutlined style={{ fontSize: 18 }} />
+									</button>
+									<button className="text-red-400 hover:text-red-300"
+										onClick={() => showDeleteConfirmModal(user.id)}
+									>
+										<DeleteOutlined style={{ fontSize: 18 }} />
+									</button>
 								</td>
 							</motion.tr>
 						))}
 					</tbody>
 				</table>
+				{response && response.data && response.data.length > 0 && (
+					<div className="pagination">
+						<button
+							onClick={handlePrevious}
+							disabled={currentPage === 1}
+							className="pagination-btn"
+						>
+							«
+						</button>
+						{renderPageNumbers()}
+						<button
+							onClick={handleNext}
+							disabled={currentPage === response.last_page}
+							className="pagination-btn"
+						>
+							»
+						</button>
+					</div>
+				)}
 			</div>
+			<UserAdd isModalOpen={isAddModalOpen} onClose={handleAddModalClose} />
+			{
+				selectedUser !== null && (
+					<UserEdit
+						isModalOpen={isEditModalOpen}
+						onClose={handleEditModalClose}
+						user={selectedUser}
+					/>
+				)
+			}
+
+			<Modal
+				title="Confirm Deletion"
+				open={isDeleteConfirmModalOpen}
+				onOk={handleDeleteConfirm}
+				onCancel={handleDeleteCancel}
+				okText="Yes"
+				cancelText="No"
+				closable
+				footer={[
+					<Button key="cancel" onClick={handleDeleteCancel}>
+						No
+					</Button>,
+					<Button
+						key="confirm"
+						type="primary"
+						onClick={handleDeleteConfirm}
+						loading={loading}
+					>
+						Yes
+					</Button>,
+				]}
+			>
+				<p>Are you sure you want to delete this user?</p>
+			</Modal>
 		</motion.div>
 	);
 };

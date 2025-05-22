@@ -17,8 +17,8 @@ class GenreController extends BaseController
 
     public function index(Request $request)
     {
-        $serach = $request->search;
-        return $this->handleIndex($this->genreService, 'name', $serach);
+        $search = $request->search;
+        return $this->handleIndex($this->genreService, 'name', $search);
     }
 
     public function show(int $id)
@@ -39,7 +39,7 @@ class GenreController extends BaseController
 
     public function update(Request $request, int $id)
     {
-        $data = $request->all();
+        $data = array_merge(['id' => $id], $request->all());
         try {
             $genre = $this->genreService->updateGenre($id, $data);
             return $this->okResponse($genre, 'Genre updated successfully');
