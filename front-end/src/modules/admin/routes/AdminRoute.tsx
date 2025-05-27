@@ -8,6 +8,7 @@ import GenrePage from "../pages/GenrePage";
 import MenuPage from "../pages/MenuPage";
 import PlanPage from "../pages/PlanPage";
 import MoviePage from "../pages/MoviePage";
+import RolePage from "../pages/RolePage";
 
 
 const AdminRoute = [
@@ -24,6 +25,7 @@ const AdminRoute = [
           { path: 'plans', element: <PlanPage /> },              
           { path: 'movies', element: <MoviePage /> },              
           { path: 'users', element: <UsersPage /> },  
+          { path: 'roles', element: <RolePage /> },  
           { path: 'orders', element: <OrdersPage /> }, 
           { path: 'settings', element: <SettingsPage /> },
         ]

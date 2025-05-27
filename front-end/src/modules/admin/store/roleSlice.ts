@@ -1,48 +1,48 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import planService, { CreatePayload, DataResponse, ErrorResponse, Plan, SingleResponse } from "../services/planService";
+import roleService, { CreatePayload, DataResponse, ErrorResponse, Role, SingleResponse } from "../services/roleService";
 
-interface PlanState {
+interface RoleState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedPlan: Plan | SingleResponse | null;
+    selectedRole: Role | SingleResponse | null;
 }
 
-const initialState: PlanState = {
+const initialState: RoleState = {
     response: null,
     loading: false,
     error: null,
-    selectedPlan: null,
+    selectedRole: null,
 }
 
-export const fetchPlans = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
-    'plan/fetchPlans',
+export const fetchRoles = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
+    'role/fetchRoles',
     async ({ page = 1, keyword = '' }, { rejectWithValue }) => {
         try {
-            const response = await planService.getPlans(page, keyword);
+            const response = await roleService.getRoles(page, keyword);
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error || 'Failed to fetch plans');
+            return rejectWithValue(error || 'Failed to fetch roles');
         }
     }
 )
 
-export const fetchPlanById = createAsyncThunk<Plan, number, { rejectValue: ErrorResponse }>(
-    'plan/fetchPlanById',
+export const fetchRoleById = createAsyncThunk<Role, number, { rejectValue: ErrorResponse }>(
+    'role/fetchRoleById',
     async (id: number, { rejectWithValue }) => {
         try {
-            const response = await planService.getPlanById(id);
+            const response = await roleService.getRoleById(id);
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error || 'Failed to fetch plan by id');
+            return rejectWithValue(error || 'Failed to fetch role by id');
         }
     })
 
-export const createPlan = createAsyncThunk<SingleResponse, CreatePayload, { rejectValue: ErrorResponse }>(
-    'plan/createPlan',
+export const createRole = createAsyncThunk<SingleResponse, CreatePayload, { rejectValue: ErrorResponse }>(
+    'role/createRole',
     async (payload, { rejectWithValue }) => {
         try {
-            const response = await planService.createPlan(payload);
+            const response = await roleService.createRole(payload);
             return response;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -50,11 +50,11 @@ export const createPlan = createAsyncThunk<SingleResponse, CreatePayload, { reje
     }
 )
 
-export const updatePlan = createAsyncThunk<SingleResponse, { id: number, data: Partial<Plan> }, { rejectValue: ErrorResponse }>(
-    'plan/updatePlan',
+export const updateRole = createAsyncThunk<SingleResponse, { id: number, data: Partial<Role> }, { rejectValue: ErrorResponse }>(
+    'role/updateRole',
     async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await planService.updatePlan(id, data);
+            const response = await roleService.updateRole(id, data);
             return response;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -62,11 +62,11 @@ export const updatePlan = createAsyncThunk<SingleResponse, { id: number, data: P
     }
 )
 
-export const deletePlan = createAsyncThunk<number, number, { rejectValue: ErrorResponse }>(
-    'plan/deletePlan',
+export const deleteRole = createAsyncThunk<number, number, { rejectValue: ErrorResponse }>(
+    'role/deleteRole',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await planService.deletePlan(id);
+            const response = await roleService.deleteRole(id);
             console.log(response);
             
             return id;
@@ -76,96 +76,96 @@ export const deletePlan = createAsyncThunk<number, number, { rejectValue: ErrorR
     }
 );
 
-const planSlice = createSlice({
-    name: 'plan',
+const roleSlice = createSlice({
+    name: 'role',
     initialState: initialState,
     reducers: {
-        setSelectedPlan(state, action: { payload: Plan | null }) {
-            state.selectedPlan = action.payload;
+        setSelectedRole(state, action: { payload: Role | null }) {
+            state.selectedRole = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder
             // fetch
-            .addCase(fetchPlans.pending, (state) => {
+            .addCase(fetchRoles.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchPlans.fulfilled, (state, action) => {
+            .addCase(fetchRoles.fulfilled, (state, action) => {
                 state.loading = false;
                 state.response = action.payload;
             })
-            .addCase(fetchPlans.rejected, (state, action) => {
+            .addCase(fetchRoles.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // fetch by id
-            .addCase(fetchPlanById.pending, (state) => {
+            .addCase(fetchRoleById.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchPlanById.fulfilled, (state, action) => {
+            .addCase(fetchRoleById.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPlan = action.payload;
+                state.selectedRole = action.payload;
             })
-            .addCase(fetchPlanById.rejected, (state, action) => {
+            .addCase(fetchRoleById.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // create
-            .addCase(createPlan.pending, (state) => {
+            .addCase(createRole.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(createPlan.fulfilled, (state, action) => {
+            .addCase(createRole.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPlan = action.payload;
+                state.selectedRole = action.payload;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }
             })
-            .addCase(createPlan.rejected, (state, action) => {
+            .addCase(createRole.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // update
-            .addCase(updatePlan.pending, (state) => {
+            .addCase(updateRole.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(updatePlan.fulfilled, (state, action) => {
+            .addCase(updateRole.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPlan = action.payload.data;
+                state.selectedRole = action.payload.data;
                 if (state.response) {
-                    const index = state.response.data.findIndex((plan) => plan.id === action.payload.data.id);
+                    const index = state.response.data.findIndex((role) => role.id === action.payload.data.id);
                     if (index !== -1) state.response.data[index] = action.payload.data;
                 }
             })
-            .addCase(updatePlan.rejected, (state, action) => {
+            .addCase(updateRole.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
 
             // delete
-            .addCase(deletePlan.pending, (state) => {
+            .addCase(deleteRole.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(deletePlan.fulfilled, (state, action) => {
+            .addCase(deleteRole.fulfilled, (state, action) => {
                 state.loading = false;
                 if (state.response) {
-                    state.response.data = state.response.data.filter((plan) => plan.id !== action.payload);
+                    state.response.data = state.response.data.filter((role) => role.id !== action.payload);
                 }
             })
-            .addCase(deletePlan.rejected, (state, action) => {
+            .addCase(deleteRole.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             });
     }
 });
 
-export const {} = planSlice.actions;
-export default planSlice.reducer;
+export const {} = roleSlice.actions;
+export default roleSlice.reducer;

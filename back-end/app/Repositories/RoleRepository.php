@@ -16,4 +16,15 @@ class RoleRepository extends BaseRepository{
             ['name' => $data['name']]
         );
     }
+
+    public function getAll(?string $key = null, ?string $search = null, int $perPage = 10)
+    {
+        $query = $this->model->newQuery();
+
+        if ($key && $search) {
+            $query->where($key, 'like', '%' . $search . '%');
+        }
+        
+        return $query->with('permissions')->paginate($perPage);
+    }
 }

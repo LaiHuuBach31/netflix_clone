@@ -1,6 +1,7 @@
 import {
 	AppstoreOutlined,
 	BarChartOutlined,
+	BookOutlined,
 	ContainerOutlined,
 	MenuOutlined,
 	PlaySquareOutlined,
@@ -19,6 +20,7 @@ const SIDEBAR_ITEMS = [
 	{ name: "Plans", icon: ContainerOutlined, color: "#6366f1", href: "/admin/plans" },
 	{ name: "Movies", icon: PlaySquareOutlined, color: "#6366f1", href: "/admin/movies" },
 	{ name: "Users", icon: UsergroupAddOutlined, color: "#EC4899", href: "/admin/users" },
+	{ name: "Role", icon: BookOutlined, color: "#EC4899", href: "/admin/roles" },
 	{ name: "Orders", icon: ShoppingCartOutlined, color: "#F59E0B", href: "/admin/orders" },
 	{ name: "Settings", icon: SettingOutlined, color: "#6EE7B7", href: "/admin/settings" },
   ];

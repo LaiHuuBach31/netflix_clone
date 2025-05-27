@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { User } from "../../services/userService";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store";
@@ -10,18 +10,19 @@ import { showSuccessToast } from "../../../../utils/toast";
 import { Button, Modal } from "antd";
 import UserAdd from "./UserAdd";
 import UserEdit from "./UserEdit";
+import AssignRole from "./AssignRole";
 
 const UsersTable = () => {
 	const [searchUser, setSearchUser] = useState("");
-	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+	const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+	const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 	const [selectedUser, setSelectedUser] = useState<User | null>(null);
 	const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
 	const [userToDeleteId, setUserToDeleteId] = useState<number | null>(null);
+	const [isAssignRoleModal, setIsAssignRoleModal] = useState<boolean>(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const { response, loading, error } = useSelector((state: RootState) => state.user);
 	const [currentPage, setCurrentPage] = useState(1);
-	console.log('response', response);
 
 	const debouncedFetchUsers = useCallback(
 		debounce((page, keyword) => {
@@ -168,6 +169,17 @@ const UsersTable = () => {
 		setUserToDeleteId(null);
 	};
 
+	// assign role
+	const showAssignRoleModal = (user: User) => {
+		setSelectedUser(user);
+		setIsAssignRoleModal(true);
+	}
+
+	const handleAssignRoleModalClose = () => {
+		setIsAssignRoleModal(false);
+		setSelectedUser(null);
+	}
+
 	return (
 		<motion.div
 			className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
@@ -213,6 +225,9 @@ const UsersTable = () => {
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Status
+							</th>
+							<th className='px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Assign Role
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Actions
@@ -267,6 +282,14 @@ const UsersTable = () => {
 
 								<td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-300">
 									<button className="text-indigo-400 hover:text-indigo-300 mr-2"
+										onClick={() => showAssignRoleModal(user)}
+									>
+										<PlusOutlined style={{ fontSize: 18 }} />
+									</button>
+								</td>
+
+								<td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-300">
+									<button className="text-indigo-400 hover:text-indigo-300 mr-2"
 										onClick={() => showEditModal(user)}
 									>
 										<EditOutlined style={{ fontSize: 18 }} />
@@ -312,6 +335,12 @@ const UsersTable = () => {
 				)
 			}
 
+			<AssignRole 
+				isModalOpen = {isAssignRoleModal}
+				user = {selectedUser}
+				onClose = {handleAssignRoleModalClose}
+			/>
+
 			<Modal
 				title="Confirm Deletion"
 				open={isDeleteConfirmModalOpen}
@@ -336,6 +365,7 @@ const UsersTable = () => {
 			>
 				<p>Are you sure you want to delete this user?</p>
 			</Modal>
+
 		</motion.div>
 	);
 };
