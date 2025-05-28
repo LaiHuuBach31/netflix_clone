@@ -10,6 +10,7 @@ import roleReducer from '../modules/admin/store/roleSlice';
 import userRoleReducer from '../modules/admin/store/userRoleSlice';
 import permissionReducer from '../modules/admin/store/permissionSlice';
 import rolePermissionReducer from '../modules/admin/store/rolePermissionSlice';
+import bannerReducer from '../modules/admin/store/bannerSlice';
 
 const store = configureStore({
   reducer: {
@@ -24,6 +25,8 @@ const store = configureStore({
     user_role: userRoleReducer,
     permission: permissionReducer,
     role_permission: rolePermissionReducer,
+    banner: bannerReducer,
+
   },
 });
 

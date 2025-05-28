@@ -39,7 +39,6 @@ const PlanEdit: React.FC<PlanEditProps> = ({ isModalOpen, onClose, plan }) => {
     }, [isModalOpen, plan, form]);
 
     const onFinish = (values: FieldType) => {
-        console.log(values);
         
         dispatch(updatePlan({ id: plan.id, data: values }))
             .unwrap()

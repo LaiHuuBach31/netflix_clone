@@ -12,6 +12,19 @@ class BannerRepository extends BaseRepository
         parent::__construct($banner);
     }
 
+    public function getAll(?string $key = null, ?string $search = null, int $perPage = 10)
+    {
+        $query = $this->model->newQuery();
+
+        if ($key && $search) {
+            $query->where($key, 'like', '%' . $search . '%');
+        }
+
+        $query->with('movie');
+        
+        return $query->paginate($perPage);
+    }
+
     public function createOrUpdate(array $data): Banner
     {
         return $this->model->updateOrCreate(
