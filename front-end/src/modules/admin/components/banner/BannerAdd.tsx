@@ -78,7 +78,7 @@ const BannerAdd: React.FC<BannerAddProps> = ({ isModalOpen, onClose }) => {
 
     const loadMoreMovies = useCallback(() => {
         if (movieLoading || !hasMoreMovies) return;
-        if (lastPageMovies && currentPage >= lastPageMovies) {
+        if (lastPageMovies && currentPage > lastPageMovies) {
             setHasMoreMovies(false);
             return;
         }

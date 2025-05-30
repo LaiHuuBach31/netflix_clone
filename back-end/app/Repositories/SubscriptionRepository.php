@@ -12,6 +12,19 @@ class SubscriptionRepository extends BaseRepository
         parent::__construct($subscription);
     }
 
+    public function getAll(?string $key = null, ?string $search = null, int $perPage = 10)
+    {
+        $query = $this->model->newQuery();
+
+        if ($key && $search) {
+            $query->where($key, 'like', '%' . $search . '%');
+        }
+
+        $query->with('user', 'plan');
+        
+        return $query->paginate($perPage);
+    }
+
     public function createOrUpdate(array $data): Subscription
     {
         return $this->model->updateOrCreate(

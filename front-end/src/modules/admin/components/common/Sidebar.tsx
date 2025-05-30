@@ -8,6 +8,7 @@ import {
 	PlaySquareOutlined,
 	SettingOutlined,
 	ShoppingCartOutlined,
+	SolutionOutlined,
 	UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
@@ -23,6 +24,7 @@ const SIDEBAR_ITEMS = [
 	{ name: "Users", icon: UsergroupAddOutlined, color: "#EC4899", href: "/admin/users" },
 	{ name: "Role", icon: BookOutlined, color: "#EC4899", href: "/admin/roles" },
 	{ name: "Banner", icon: FileImageOutlined, color: "#EC4899", href: "/admin/banners" },
+	{ name: "Subscriptions", icon: SolutionOutlined, color: "#EC4899", href: "/admin/subscriptions" },
 	{ name: "Orders", icon: ShoppingCartOutlined, color: "#F59E0B", href: "/admin/orders" },
 	{ name: "Settings", icon: SettingOutlined, color: "#6EE7B7", href: "/admin/settings" },
   ];

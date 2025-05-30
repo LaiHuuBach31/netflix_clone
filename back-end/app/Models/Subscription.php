@@ -11,4 +11,12 @@ class Subscription extends Model
 
     protected $fillable = ['id', 'user_id', 'plan_id', 'start_date', 'end_date', 'status'];
 
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function plan() {
+        return $this->belongsTo(Plan::class, 'plan_id', 'id');
+    }
+
 }
