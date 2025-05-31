@@ -1,5 +1,5 @@
 import React from 'react'
-import './favoritePage.css';
+import './favouritePage.css';
 import { Button, Col, Rate, Row, Select, Tag } from 'antd';
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { Option } from 'antd/es/mentions';
@@ -38,7 +38,7 @@ const movies = [
   },
 ];
 
-function FavoritePage() {
+function FavouritePage() {
   return (
     <>
       <div className='favorite' style={{ flex: 1, padding: '0 100px' }}>
@@ -71,4 +71,4 @@ function FavoritePage() {
   )
 }
 
-export default FavoritePage
+export default FavouritePage

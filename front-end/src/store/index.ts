@@ -12,6 +12,9 @@ import permissionReducer from '../modules/admin/store/permissionSlice';
 import rolePermissionReducer from '../modules/admin/store/rolePermissionSlice';
 import bannerReducer from '../modules/admin/store/bannerSlice';
 import subscriptionReducer from '../modules/admin/store/subscriptionSlice';
+import watchHistoryReducer from '../modules/admin/store/watchHistorySlice';
+import ratingReducer from '../modules/admin/store/ratingSlice';
+import favouriteReducer from '../modules/admin/store/favouriteSlice';
 
 const store = configureStore({
   reducer: {
@@ -28,6 +31,9 @@ const store = configureStore({
     role_permission: rolePermissionReducer,
     banner: bannerReducer,
     subscription: subscriptionReducer,
+    watchHistory: watchHistoryReducer,
+    rating: ratingReducer,
+    favourite: favouriteReducer,
   },
 });
 

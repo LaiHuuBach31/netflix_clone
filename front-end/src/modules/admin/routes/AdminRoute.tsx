@@ -11,6 +11,9 @@ import MoviePage from "../pages/MoviePage";
 import RolePage from "../pages/RolePage";
 import BannerPage from "../pages/BannerPage";
 import SubscriptionPage from "../pages/SubscriptionPage";
+import WatchHistoryPage from "../pages/WatchHistoryPage";
+import RatingPage from "../pages/RatingPage";
+import FavouritePage from "../pages/FavouritePage";
 
 
 const AdminRoute = [
@@ -30,7 +33,10 @@ const AdminRoute = [
           { path: 'roles', element: <RolePage /> },  
           { path: 'banners', element: <BannerPage /> },  
           { path: 'subscriptions', element: <SubscriptionPage /> },  
-          { path: 'orders', element: <OrdersPage /> }, 
+          { path: 'watch-history', element: <WatchHistoryPage /> },  
+          { path: 'ratings', element: <RatingPage /> },  
+          { path: 'favourites', element: <FavouritePage /> },  
+          // { path: 'orders', element: <OrdersPage /> }, 
           { path: 'settings', element: <SettingsPage /> },
         ]
       }

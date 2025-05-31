@@ -1,6 +1,6 @@
 import UserLayout from "../../../layout/UserLayout";
 import DetailPage from "../pages/detail/DetailPage";
-import FavoritePage from "../pages/favourite/FavoritePage";
+import FavoritePage from "../pages/favourite/FavouritePage";
 import HomePage from "../pages/home/HomePage";
 import MoviesPage from "../pages/movies/MoviesPage";
 import ProfilePage from "../pages/profile/ProfilePage";
