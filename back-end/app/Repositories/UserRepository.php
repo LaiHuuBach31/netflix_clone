@@ -37,4 +37,8 @@ class UserRepository extends BaseRepository{
         
         return $query->paginate($perPage);
     }
+
+    public function getDataExport() {
+        return $query = $this->model->get();
+    }
 }

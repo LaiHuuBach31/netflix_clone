@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\ErrorExport;
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends BaseController
 {
@@ -62,5 +64,30 @@ class UserController extends BaseController
     public function destroy(int $id)
     {
         return $this->handleDelete($this->userService, $id, 'user');
+    }
+
+    public function export() {
+        return $this->userService->exportUsers();
+    }
+
+    public function import(Request $request) {
+        try {
+
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls',
+            ]);
+
+            $errors = $this->userService->importUsers($request->file('file'));
+
+            if (!empty($errors)) {
+                $export = new ErrorExport($errors);
+                return Excel::download($export, 'import_errors.xlsx');
+            }
+
+            return $this->okResponse(null, 'Users imported successfully');
+            
+        } catch (ValidationException $e) {
+            return $this->handleValidationException($e);
+        }
     }
 }

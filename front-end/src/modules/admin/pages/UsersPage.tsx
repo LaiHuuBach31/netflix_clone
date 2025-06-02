@@ -7,15 +7,20 @@ import UsersTable from "../components/users/UsersTable";
 import UserGrowthChart from "../components/users/UserGrowthChart";
 import UserActivityHeatmap from "../components/users/UserActivityHeatmap";
 import UserDemographicsChart from "../components/users/UserDemographicsChart";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import { data } from "react-router";
+import { User } from "../services/userService";
+import { now } from "lodash";
 
-const userStats = {
-	totalUsers: 152845,
-	newUsersToday: 243,
-	activeUsers: 98520,
-	churnRate: "2.4%",
-};
+const UsersPage:React.FC = () => {
 
-const UsersPage = () => {
+	const { response } = useSelector((state: RootState) => state.user);
+	const totalUsers = response?.total ?? 0;
+
+	// const users = response?.data || [];	
+	// const activeUsers = users.filter((user: User) => user.status == true).length;
+
 	return (
 		<div className='flex-1 overflow-auto relative z-10'>
 			<Header title='Users' />
@@ -31,27 +36,25 @@ const UsersPage = () => {
 					<StatCard
 						name='Total Users'
 						icon={TeamOutlined}
-						value={userStats.totalUsers.toLocaleString()}
+						value={totalUsers.toLocaleString()}
 						color='#6366F1'
 					/>
-					<StatCard name='New Users Today' icon={PlusCircleOutlined} value={userStats.newUsersToday} color='#10B981' />
-					<StatCard
+					{/* <StatCard
 						name='Active Users'
 						icon={CheckCircleOutlined}
-						value={userStats.activeUsers.toLocaleString()}
+						value={activeUsers.toLocaleString()}
 						color='#F59E0B'
-					/>
-					<StatCard name='Churn Rate' icon={CloseCircleOutlined} value={userStats.churnRate} color='#EF4444' />
+					/> */}
 				</motion.div>
 
 				<UsersTable />
 
 				{/* USER CHARTS */}
-				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
+				{/* <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
 					<UserGrowthChart />
 					<UserActivityHeatmap />
 					<UserDemographicsChart />
-				</div>
+				</div> */}
 			</main>
 		</div>
 	);

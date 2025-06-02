@@ -37,7 +37,7 @@ Route::group([
 ], function () {
 
     Route::post('/login', [AuthController::class, 'login'])->name('login');
-    Route::post('/register', [AuthController::class, 'register'])->name('login');
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
 
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
     Route::post('/refresh', [AuthController::class, 'refresh']);
@@ -45,6 +45,8 @@ Route::group([
 
     Route::group(['prefix' => 'users', 'middleware' => ['auth:api']], function () {
         Route::get('/', [UserController::class, 'index'])->middleware('check.permission:get_users');
+        Route::get('/export', [UserController::class, 'export'])->middleware('check.permission:export_user');
+        Route::post('/import', [UserController::class, 'import'])->middleware('check.permission:import_user');
         Route::get('/{id}', [UserController::class, 'show'])->middleware('check.permission:show_user');
         Route::post('/', [UserController::class, 'store'])->middleware('check.permission:create_user');
         Route::put('/{id}', [UserController::class, 'update'])->middleware('check.permission:update_user');

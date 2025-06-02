@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, DownloadOutlined, EditOutlined, PlusOutlined, SearchOutlined, UploadOutlined } from "@ant-design/icons";
 import { User } from "../../services/userService";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../store";
 import { debounce } from "lodash";
-import { deleteUser, fetchUsers } from "../../store/userSlice";
-import { showSuccessToast } from "../../../../utils/toast";
+import { clearImportErrors, deleteUser, exportUsers, fetchUsers, importUsers } from "../../store/userSlice";
+import { showErrorToast, showSuccessToast, showWarningToast } from "../../../../utils/toast";
 import { Button, Modal } from "antd";
 import UserAdd from "./UserAdd";
 import UserEdit from "./UserEdit";
 import AssignRole from "./AssignRole";
+import { saveAs } from "file-saver";
+import * as XLSX from 'xlsx';
 
 const UsersTable = () => {
 	const [searchUser, setSearchUser] = useState("");
@@ -20,9 +22,12 @@ const UsersTable = () => {
 	const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
 	const [userToDeleteId, setUserToDeleteId] = useState<number | null>(null);
 	const [isAssignRoleModal, setIsAssignRoleModal] = useState<boolean>(false);
+	const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
-	const { response, loading, error } = useSelector((state: RootState) => state.user);
+	const { response, loading, error, importErrors } = useSelector((state: RootState) => state.user);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [file, setFile] = useState<File | null>(null);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const debouncedFetchUsers = useCallback(
 		debounce((page, keyword) => {
@@ -180,6 +185,62 @@ const UsersTable = () => {
 		setSelectedUser(null);
 	}
 
+	const handleExport = () => {
+		dispatch(exportUsers())
+			.unwrap()
+			.then((response) => {
+				saveAs(response.file, 'users.xlsx');
+				showSuccessToast('Export successful');
+			})
+			.catch((error) => {
+				showErrorToast(error.message || 'Failed to export users');
+			});
+	};
+
+	const handleImport = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.click();
+		}
+	};
+
+	const generateErrorExcelFile = (errors: any[]) => {
+		const worksheet = XLSX.utils.aoa_to_sheet(errors);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Errors");
+
+		const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+		const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+		saveAs(blob, "import_errors.xlsx");
+	};
+
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const selectedFile = e.target.files?.[0] || null;
+		setFile(selectedFile);
+
+		if (selectedFile) {
+			dispatch(importUsers(selectedFile))
+				.unwrap()
+				.then((response) => {
+					console.log('response');
+					console.log(response);
+
+					if (response.status) {
+						showSuccessToast(response.message || 'Users imported successfully');
+						dispatch(fetchUsers({ page: currentPage, keyword: searchUser }));
+					}
+				})	
+				.catch((error) => {
+					showErrorToast(error.message || 'Failed to import users');
+				})
+				.finally(() => {
+					setFile(null);
+					if (fileInputRef.current) fileInputRef.current.value = '';
+				});
+		} else {
+			showWarningToast('Please select a file');
+		}
+	};
+
 	return (
 		<motion.div
 			className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
@@ -201,9 +262,25 @@ const UsersTable = () => {
 					<SearchOutlined className="absolute left-3 top-2.5 text-gray-400" style={{ fontSize: 18 }} />
 				</div>
 
-				<button className="bg-[#2b3e59] px-5 py-2 font-semibold rounded-lg" onClick={showModalAdd}>
-					Add
-				</button>
+				<div>
+					<button className="bg-[#2b3e59] px-5 py-2 font-semibold rounded-lg" onClick={showModalAdd}>
+						Add +
+					</button>
+					<button className="bg-[#2b3e59] px-5 py-2 mx-2 font-semibold rounded-lg" onClick={handleExport}>
+						Export <DownloadOutlined />
+					</button>
+					<button className="bg-[#2b3e59] px-5 py-2 font-semibold rounded-lg" onClick={handleImport}>
+						Import <UploadOutlined />
+					</button>
+					<input
+						ref={fileInputRef}
+						id="importFileInput"
+						type="file"
+						accept=".xlsx, .xls"
+						onChange={handleFileChange}
+						className="hidden"
+					/>
+				</div>
 
 			</div>
 
@@ -335,10 +412,10 @@ const UsersTable = () => {
 				)
 			}
 
-			<AssignRole 
-				isModalOpen = {isAssignRoleModal}
-				user = {selectedUser}
-				onClose = {handleAssignRoleModalClose}
+			<AssignRole
+				isModalOpen={isAssignRoleModal}
+				user={selectedUser}
+				onClose={handleAssignRoleModalClose}
 			/>
 
 			<Modal
@@ -365,6 +442,8 @@ const UsersTable = () => {
 			>
 				<p>Are you sure you want to delete this user?</p>
 			</Modal>
+
+
 
 		</motion.div>
 	);

@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\DTOs\UserDTO;
+use App\Exports\UsersExport;
+use App\Imports\UsersImport;
 use App\Mapper\UserMapper;
 use App\Repositories\UserRepository;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserService extends BaseService
 {
@@ -56,5 +59,17 @@ class UserService extends BaseService
         $dto = new UserDTO($data, true);
         $updated = parent::update($id, $dto);
         return UserMapper::fromModel($updated);
+    }
+
+    public function exportUsers()
+    {
+        return Excel::download(new UsersExport($this->repository), 'users.xlsx');
+    }
+
+    public function importUsers($file)
+    {
+        $import = new UsersImport($this->repository);
+        Excel::import($import, $file);
+        return $import->getErrorRows();
     }
 }
