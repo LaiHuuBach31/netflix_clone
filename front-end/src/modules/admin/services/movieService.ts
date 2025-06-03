@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { Genre } from "./genreService";
 
 export interface Movie {
     id: number;
@@ -8,6 +9,8 @@ export interface Movie {
     release_year: number;
     is_featured: boolean;
     description: string;
+    genre_id: number
+    genre: Genre
 }
 
 export interface CreatePayload {
@@ -17,6 +20,7 @@ export interface CreatePayload {
     release_year: number;
     is_featured: boolean;
     description: string;
+    genre_id: number;
 }
 
 export interface PaginationLinks {

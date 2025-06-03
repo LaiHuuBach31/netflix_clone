@@ -19,6 +19,7 @@ class MovieDTO extends BaseDTO
                 'video_url' => 'required|string|max:225',
                 'release_year' => 'required',
                 'is_featured' => 'required',
+                'genre_id' => 'required',
             ]);
 
             if($validate->fails()){

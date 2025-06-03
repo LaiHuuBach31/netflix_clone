@@ -39,6 +39,7 @@ class MovieController extends BaseController
             "video_url" => $request->video_url ?? null,
             "release_year" => $request->release_year ?? null,
             "is_featured" => $request->is_featured ?? true,
+            "genre_id" => $request->genre_id,
         ];
 
         try {

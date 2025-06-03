@@ -209,6 +209,9 @@ const MovieTable: React.FC = () => {
                                 Name
                             </th>
                             <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                Genre
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
                                 Thumbnail
                             </th>
                             <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -234,6 +237,9 @@ const MovieTable: React.FC = () => {
                                 <td className="px-6 py-3 text-center">{key + 1}</td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
                                     {movie.title}
+                                </td>
+                                <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
+                                    {movie.genre?.name}
                                 </td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
                                     <div className='flex justify-center items-center'>
