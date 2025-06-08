@@ -11,7 +11,7 @@ interface GenreState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedGenre: Genre | SingleGenreResponse | null;
+    selectedGenre: Genre | null;
 }
 
 const initialState: GenreState = {
@@ -125,7 +125,7 @@ const genreSlice = createSlice({
             })
             .addCase(createGenre.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedGenre = action.payload;
+                state.selectedGenre = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

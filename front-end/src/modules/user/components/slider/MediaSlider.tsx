@@ -6,33 +6,34 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { Movie } from '../../../admin/services/movieService';
 
 interface MediaSliderProps {
     title: string;
-    movies: {
-        id: number;
-        title: string;
-        image: string;
-    }[];
+    movies: Movie[];
     showIndex?: boolean;
     slidesPerView?: number;
     spaceBetween?: number;
     height?: number;
+    onClick?: (movieId: number) => void;
 };
 
 
-const MediaSlider: React.FC<MediaSliderProps> = ({ title, movies, showIndex = false, slidesPerView = 7, spaceBetween = 30, height = 149.286 }) => {
+const MediaSlider: React.FC<MediaSliderProps> = ({ title, movies, showIndex = false, slidesPerView = 7, spaceBetween = 30, height = 149.286, onClick }) => {
     return (
         <>
             <h1 className="mb-3 font-extrabold text-[30px]">{title}</h1>
 
-            <div className="swiper-button-prev-custom absolute top-[60%] left-0 -translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
-                <LeftOutlined />
-            </div>
-
-            <div className="swiper-button-next-custom absolute top-[60%] right-0 translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
-                <RightOutlined />
-            </div>
+            {movies.length > 0 && (
+                <>
+                    <div className="swiper-button-prev-custom absolute top-[60%] left-0 -translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
+                        <LeftOutlined />
+                    </div>
+                    <div className="swiper-button-next-custom absolute top-[60%] right-0 translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
+                        <RightOutlined />
+                    </div>
+                </>
+            )}
 
             <Swiper
                 spaceBetween={spaceBetween}
@@ -46,10 +47,12 @@ const MediaSlider: React.FC<MediaSliderProps> = ({ title, movies, showIndex = fa
             >
                 {movies.map((movie, index) => (
                     <SwiperSlide key={movie.id}>
-                        <div className={`relative overflow-hidden rounded-xl h-[${height}px]`}>
+                        <div className={`relative overflow-hidden rounded-xl h-[${height}px]`}
+                            onClick={() => onClick && onClick(movie.id)}
+                        >
                             <img
                                 className=" rounded-xl transition-transform duration-500 transform hover:scale-110 w-full h-full"
-                                src={movie.image}
+                                src={movie.thumbnail}
                                 alt={movie.title}
                             />
                             {showIndex && (

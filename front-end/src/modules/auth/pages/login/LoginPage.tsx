@@ -11,28 +11,28 @@ import { AppDispatch, RootState } from '../../../../store';
 const LoginPage: React.FC = () => {
 
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error, user} = useSelector((state: RootState) => state.auth);
+  const { loading, error, user } = useSelector((state: RootState) => state.auth);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      const result = await dispatch(loginAsync({email, password})).unwrap();
-      console.log('re', result);
-      console.log(user, 'user');
-      
-            
-      const roles = result.user?.roles || [];      
+      const result = await dispatch(loginAsync({ email, password })).unwrap();
+
+      const roles = result.user?.roles || [];
       if (roles.includes('Admin')) {
         navigate("/admin");
       } else {
         navigate("/");
       }
       showSuccessToast("Login successful");
-    } catch (error:any) {
-      console.log(error);
-      showErrorToast(error);
+    } catch (error: any) {
+      const errorDetails = error.errors ? Object.values(error.errors).flat() : [];
+      const detailedError = errorDetails.length
+        ? errorDetails[0]
+        : error.message || "Login failed";
+      showErrorToast(detailedError);
     }
   };
 
@@ -110,7 +110,7 @@ const LoginPage: React.FC = () => {
             </Flex>
 
             <div className="text-sm text-gray-400">
-              New to Design Flix? <a href="#" className="text-white">Sign up now.</a>
+              New to Design Flix? <Link className="text-white" to="/welcome">Sign up now.</Link>
             </div>
             <p className="text-xs text-gray-500 mt-2">
               This page is protected by Google reCAPTCHA to ensure you’re not a bot.

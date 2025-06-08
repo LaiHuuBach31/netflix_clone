@@ -9,6 +9,7 @@ interface LoginRequest {
 }
 
 interface RegisterRequest {
+    avatar?: string,
     name: string,
     email: string,
     password: string,
@@ -70,10 +71,10 @@ const authService = {
     register: async (data: RegisterRequest): Promise<AuthResponse> => {
         const response = await api.post<AuthResponse>('/register', data);
         const { access_token, refresh_token } = response.data.data;
-        if (access_token && refresh_token) {
-            localStorage.setItem('access_token', access_token);
-            localStorage.setItem('refresh_token', refresh_token);
-        }
+        // if (access_token && refresh_token) {
+        //     localStorage.setItem('access_token', access_token);
+        //     localStorage.setItem('refresh_token', refresh_token);
+        // }
         return response.data;
     },
 

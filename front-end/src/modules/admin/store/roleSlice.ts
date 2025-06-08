@@ -5,7 +5,7 @@ interface RoleState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedRole: Role | SingleResponse | null;
+    selectedRole: Role | null;
 }
 
 const initialState: RoleState = {
@@ -121,7 +121,7 @@ const roleSlice = createSlice({
             })
             .addCase(createRole.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedRole = action.payload;
+                state.selectedRole = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

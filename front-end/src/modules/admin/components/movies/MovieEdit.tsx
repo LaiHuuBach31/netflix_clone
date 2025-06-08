@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
 import { uploadImage, deleteFile, uploadVideo, clearUploadState } from '../../store/uploadSlice';
-import { updateMovie } from '../../store/movieSlice';
+import { fetchMovies, updateMovie } from '../../store/movieSlice';
 import VirtualList from 'rc-virtual-list';
 import { fetchGenres } from '../../store/genreSlice';
 import { Genre } from '../../services/genreService';
@@ -47,6 +47,8 @@ const MovieEdit: React.FC<MovieEditProps> = ({ isModalOpen, movie, onClose }) =>
 
   useEffect(() => {
     if (isModalOpen && movie) {
+      dispatch(clearUploadState());
+
       form.setFieldsValue({
         title: movie.title,
         thumbnail: movie.thumbnail,
@@ -112,11 +114,11 @@ const MovieEdit: React.FC<MovieEditProps> = ({ isModalOpen, movie, onClose }) =>
   }, [genreResponse, genreLoading]);
 
   useEffect(() => {
-    if (imageUrl) {
+    if (imageUrl && thumbnailList.length > 0 && thumbnailList[0].status === 'uploading') {
       form.setFieldsValue({ thumbnail: imageUrl });
       setThumbnailList([{ ...thumbnailList[0], url: imageUrl, status: 'done' }]);
     }
-    if (videoUrl) {
+    if (videoUrl && videoList.length > 0 && videoList[0].status === 'uploading') {
       form.setFieldsValue({ video_url: videoUrl });
       setVideoList([{ ...videoList[0], url: videoUrl, status: 'done' }]);
     }
@@ -170,23 +172,42 @@ const MovieEdit: React.FC<MovieEditProps> = ({ isModalOpen, movie, onClose }) =>
 
       const file = newFileList[0].originFileObj;
       const previewUrl = URL.createObjectURL(file);
-      setThumbnailList([{ ...newFileList[0], url: previewUrl, status: 'uploading' }]);
+      setThumbnailList([{ uid: '-1', name: file.name, url: previewUrl, status: 'uploading' }]); 
 
       try {
         const result = await dispatch(uploadImage(formData, { signal })).unwrap();
-        setThumbnailList([{ ...newFileList[0], url: result.data, status: 'done' }]);
+        setThumbnailList([{ uid: '-1', name: result.data.split('/').pop() || 'thumbnail.jpg', url: result.data, status: 'done' }]); 
         form.setFieldsValue({ thumbnail: result.data });
         showSuccessToast(result.message);
 
         if (movie.thumbnail && movie.thumbnail !== result.data) {
-          await dispatch(deleteFile(movie.thumbnail)).unwrap();
+          try {
+            await dispatch(deleteFile(movie.thumbnail)).unwrap();
+          } catch (error: any) {
+            if (error.message !== 'File not found') {
+              showErrorToast(error.message || 'Failed to delete old thumbnail');
+            }
+          }
         }
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to upload thumbnail');
         if (imageUrl) {
           await dispatch(deleteFile(imageUrl)).unwrap();
         }
-        setThumbnailList([{ ...newFileList[0], status: 'error' }]);
+        setThumbnailList([]); 
+      }
+    } else {
+      form.setFieldsValue({ thumbnail: '' });
+      setThumbnailList([]); 
+      dispatch(clearUploadState()); 
+      if (movie.thumbnail) {
+        try {
+          await dispatch(deleteFile(movie.thumbnail)).unwrap();
+        } catch (error: any) {
+          if (error.message !== 'File not found') {
+            showErrorToast(error.message || 'Failed to delete old thumbnail');
+          }
+        }
       }
     }
   };
@@ -202,23 +223,42 @@ const MovieEdit: React.FC<MovieEditProps> = ({ isModalOpen, movie, onClose }) =>
 
       const file = newFileList[0].originFileObj;
       const previewUrl = URL.createObjectURL(file);
-      setVideoList([{ ...newFileList[0], url: previewUrl, status: 'uploading' }]);
+      setVideoList([{ uid: '-2', name: file.name, url: previewUrl, status: 'uploading' }]); 
 
       try {
         const result = await dispatch(uploadVideo(formData, { signal })).unwrap();
-        setVideoList([{ ...newFileList[0], url: result.data, status: 'done' }]);
+        setVideoList([{ uid: '-2', name: result.data.split('/').pop() || 'video.mp4', url: result.data, status: 'done' }]); 
         form.setFieldsValue({ video_url: result.data });
         showSuccessToast(result.message);
 
         if (movie.video_url && movie.video_url !== result.data) {
-          await dispatch(deleteFile(movie.video_url)).unwrap();
+          try {
+            await dispatch(deleteFile(movie.video_url)).unwrap();
+          } catch (error: any) {
+            if (error.message !== 'File not found') {
+              showErrorToast(error.message || 'Failed to delete old video');
+            }
+          }
         }
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to upload video');
         if (videoUrl) {
           await dispatch(deleteFile(videoUrl)).unwrap();
         }
-        setVideoList([{ ...newFileList[0], status: 'error' }]);
+        setVideoList([]); 
+      }
+    } else {
+      form.setFieldsValue({ video_url: '' });
+      setVideoList([]); 
+      dispatch(clearUploadState());
+      if (movie.video_url) {
+        try {
+          await dispatch(deleteFile(movie.video_url)).unwrap();
+        } catch (error: any) {
+          if (error.message !== 'File not found') {
+            showErrorToast(error.message || 'Failed to delete old video');
+          }
+        }
       }
     }
   };
@@ -239,8 +279,13 @@ const MovieEdit: React.FC<MovieEditProps> = ({ isModalOpen, movie, onClose }) =>
 
     try {
       const result = await dispatch(updateMovie(movieData)).unwrap();
+      dispatch(fetchMovies({ page: 1, keyword: '' }));
       showSuccessToast(result.message);
       onClose();
+      dispatch(clearUploadState());
+      setThumbnailList([]);
+      setVideoList([]);
+      setGenreOption([]);
     } catch (error: any) {
       const errorDetails = error.errors ? Object.values(error.errors).flat() : [];
       const detailedError = errorDetails.length
@@ -258,6 +303,7 @@ const MovieEdit: React.FC<MovieEditProps> = ({ isModalOpen, movie, onClose }) =>
       setThumbnailList([]);
       setVideoList([]);
       setGenreOption([]);
+      dispatch(clearUploadState());
     }
   };
 

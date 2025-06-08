@@ -7,14 +7,14 @@ const FooterBar: React.FC = () => {
     <div className="px-[150px] py-8">
       <Footer className="bg-[#232323] py-8 footer">
         <p className="mb-6 underline font-medium text-[gray]">
-          Bạn có câu hỏi? Liên hệ với chúng tôi.
+          Have a question? Contact us.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            ["Câu hỏi thường gặp", "Quan hệ với nhà đầu tư", "Quyền riêng tư", "Kiểm tra tốc độ"],
-            ["Trung tâm trợ giúp", "Việc làm", "Tùy chọn cookie", "Thông báo pháp lý"],
-            ["Tài khoản", "Các cách xem", "Thông tin doanh nghiệp", "Chỉ có trên Netflix"],
-            ["Trung tâm đa phương tiện", "Điều khoản sử dụng", "Liên hệ với chúng tôi"],
+            ["FAQ", "Investor Relations", "Privacy", "Speed Test"],
+            ["Help Center", "Jobs", "Cookie Preferences", "Legal Notices"],
+            ["Account", "Ways to Watch", "Corporate Information", "Only on Netflix"],
+            ["Media Center", "Terms of Use", "Contact Us"],
           ].map((col, idx) => (
             <div key={idx} className="flex flex-col gap-2">
               {col.map((link, i) => <a key={i} href="#">{link}</a>)}

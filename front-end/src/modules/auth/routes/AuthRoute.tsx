@@ -4,7 +4,7 @@ import ChoosePlanPage from "../pages/register/ChoosePlanPage";
 import PaymentPage from "../pages/register/PaymentPage";
 import SignUpPage from "../pages/register/SignUpPage";
 import WelcomePage from "../pages/register/WelcomePage";
-import GuestRoute from "./GuestRoute";
+import GuestRoute from "../../../routes/GuestRoute";
 
 const AuthRoute = [
     {

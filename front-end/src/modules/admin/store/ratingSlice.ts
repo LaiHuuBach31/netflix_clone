@@ -5,7 +5,7 @@ interface RatingState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedRating: Rating | SingleResponse | null;
+    selectedRating: Rating | null;
 }
 
 const initialState: RatingState = {
@@ -121,7 +121,7 @@ const ratingSlice = createSlice({
             })
             .addCase(createRating.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedRating = action.payload;
+                state.selectedRating = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

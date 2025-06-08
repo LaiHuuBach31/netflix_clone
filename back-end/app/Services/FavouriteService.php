@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\FavouriteDTO;
+use App\Exceptions\CreationFailedException;
 use App\Mapper\FavouriteMapper;
 use App\Repositories\FavouriteRepository;
 
@@ -29,6 +30,15 @@ class FavouriteService extends BaseService
     public function createFavourite(array $data)
     {
         $dto = new FavouriteDTO($data, true);
+        $userId = $dto->user_id;
+        $movieId = $dto->movie_id;
+
+        $existingFavourite = $this->repository->checkFavourite($userId, $movieId);
+
+        if ($existingFavourite) {
+            throw new CreationFailedException();
+        }
+
         $created = parent::create($dto);
         return FavouriteMapper::fromModel($created);
     }
@@ -36,6 +46,15 @@ class FavouriteService extends BaseService
     public function updateFavourite(int $id, array $data)
     {
         $dto = new FavouriteDTO($data, true);
+        $userId = $dto->user_id;
+        $movieId = $dto->movie_id;
+
+        $existingFavourite = $this->repository->checkFavourite($userId, $movieId);
+
+        if ($existingFavourite && $existingFavourite->id != $id) {
+            throw new CreationFailedException();
+        }
+
         $updated = parent::update($id, $dto);
         return FavouriteMapper::fromModel($updated);
     }

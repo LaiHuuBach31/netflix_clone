@@ -32,8 +32,15 @@ class UserController extends BaseController
 
     public function store(Request $request)
     {
+        $data = [
+            "name" => $request->name,
+            "avatar" => $request->avatar,
+            "email" => $request->email,
+            "status" => true,
+            "password" => bcrypt($request->password),
+        ];
         try {
-            $user = $this->userService->createUser($request->all());
+            $user = $this->userService->createUser($data);
             return $this->createdResponse($user, 'User created successfully');
         } catch (ValidationException $e) {
             return $this->handleValidationException($e);
@@ -43,12 +50,12 @@ class UserController extends BaseController
     public function update(Request $request, int $id)
     {
         $data = array_merge(
-            ['id' => $id], 
+            ['id' => $id],
             [
                 "name" => $request->name,
                 "avatar" => $request->avatar,
-                "email" => $request->email ,
-                "status" => $request->status ,  
+                "email" => $request->email,
+                "status" => $request->status,
                 "password" => bcrypt($request->password),
             ]
         );
@@ -66,11 +73,13 @@ class UserController extends BaseController
         return $this->handleDelete($this->userService, $id, 'user');
     }
 
-    public function export() {
+    public function export()
+    {
         return $this->userService->exportUsers();
     }
 
-    public function import(Request $request) {
+    public function import(Request $request)
+    {
         try {
 
             $request->validate([
@@ -85,7 +94,6 @@ class UserController extends BaseController
             }
 
             return $this->okResponse(null, 'Users imported successfully');
-            
         } catch (ValidationException $e) {
             return $this->handleValidationException($e);
         }

@@ -6,7 +6,7 @@ interface UserRoleState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedUserRole: UserRole | SingleResponse | null;
+    selectedUserRole: UserRole | null;
 }
 
 const initialState: UserRoleState = {
@@ -122,7 +122,7 @@ const userRoleSlice = createSlice({
             })
             .addCase(createUserRole.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedUserRole = action.payload;
+                state.selectedUserRole = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

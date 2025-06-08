@@ -5,7 +5,7 @@ interface WatchHistoryState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedWatchHistory: WatchHistory | SingleResponse | null;
+    selectedWatchHistory: WatchHistory | null;
 }
 
 const initialState: WatchHistoryState = {
@@ -121,7 +121,7 @@ const watchHistorySlice = createSlice({
             })
             .addCase(createWatchHistory.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedWatchHistory = action.payload;
+                state.selectedWatchHistory = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

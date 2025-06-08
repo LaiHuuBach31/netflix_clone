@@ -1,8 +1,6 @@
 import AdminLayout from "../../../layout/AdminLayout";
-import PrivateRoute from "../../../routes/ProtectedRoute";
 import OverviewPage from "../pages/OverviewPage";
 import UsersPage from "../pages/UsersPage";
-import OrdersPage from "../pages/OrdersPage";
 import SettingsPage from "../pages/SettingsPage";
 import GenrePage from "../pages/GenrePage";
 import MenuPage from "../pages/MenuPage";
@@ -14,12 +12,13 @@ import SubscriptionPage from "../pages/SubscriptionPage";
 import WatchHistoryPage from "../pages/WatchHistoryPage";
 import RatingPage from "../pages/RatingPage";
 import FavouritePage from "../pages/FavouritePage";
+import ProtectedRoute from "../../../routes/ProtectedRoute";
 
 
 const AdminRoute = [
   {
     path: '/admin',
-    element: <PrivateRoute />, 
+    element: <ProtectedRoute />, 
     children: [
       {
         element: <AdminLayout />,  

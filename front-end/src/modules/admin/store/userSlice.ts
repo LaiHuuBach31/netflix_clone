@@ -5,7 +5,7 @@ interface UserState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedUser: User | SingleResponse | null;
+    selectedUser: User | null;
     importErrors: any[] | null; 
 }
 
@@ -150,7 +150,7 @@ const userSlice = createSlice({
             })
             .addCase(createUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedUser = action.payload;
+                state.selectedUser = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

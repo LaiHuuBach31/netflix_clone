@@ -238,7 +238,7 @@ const BannerTable: React.FC = () => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
-                                   {banner.movie.title} 
+                                   {banner.movie?.title} 
                                 </td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-100">
                                     {banner.is_active ? 'Active' : 'InActive'}

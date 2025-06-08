@@ -5,7 +5,7 @@ interface PlanState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedPlan: Plan | SingleResponse | null;
+    selectedPlan: Plan | null;
 }
 
 const initialState: PlanState = {
@@ -121,7 +121,7 @@ const planSlice = createSlice({
             })
             .addCase(createPlan.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPlan = action.payload;
+                state.selectedPlan = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

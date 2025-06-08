@@ -3,7 +3,7 @@ import { Button, Card, Carousel, Col, Collapse, Input, Row, Space } from 'antd';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Navigation } from 'swiper/modules';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './homePage.css';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -12,59 +12,32 @@ import 'swiper/css/scrollbar';
 import Banner from '../../components/banner/Banner';
 import QnA from '../../components/q&a/QnA';
 import MediaSlider from '../../components/slider/MediaSlider';
-
-
-const movies = [
-  {
-    id: 1,
-    title: 'Lời Thề Nguyện Ánh Trăng',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-  {
-    id: 2,
-    title: 'Hốn Ma Học Đường (Phần 1)',
-    image: 'https://occ-0-3687-58.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABaXp51GeqmxqBq5ors3pR1YbCvPrYSRlEzf_uBel_vEYF0PABMM2cDJy9kUO1SnM9s3EJVYaAbamh2cXCWf8p38osPWcXYFKwSS0e7ADVm94ZbEuKXXZL0VF09Th9zm9hFAEQe5M2MhG2hA3ycdAoHFaroertXe1K1BDTeGrG0KaWcaS76wJcVDLlIV8pE5wtnmnoZ14Wb5CkA4d.webp?r=153',
-  },
-  {
-    id: 3,
-    title: 'Đấu Phá Thương Khung Ngoại Truyện',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-  {
-    id: 4,
-    title: 'Gia đình Tiểu Mẫn',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-  {
-    id: 5,
-    title: 'Cesium Fallout',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-
-  {
-    id: 6,
-    title: 'Cesium Fallout',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-  {
-    id: 7,
-    title: 'Cesium Fallout',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-  {
-    id: 8,
-    title: 'Cesium Fallout',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-  {
-    id: 9,
-    title: 'Cesium Fallout',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-  },
-];
-
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../../store';
+import { fetchMovies } from '../../../admin/store/movieSlice';
+import { Movie } from '../../../admin/services/movieService';
+import { useNavigate } from 'react-router';
 
 const HomePage: React.FC = () => {
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { response: moviesResponse, loading: moviesLoading } = useSelector((state: RootState) => state.movie);
+
+  useEffect(() => {
+    let user = localStorage.getItem('user');
+    let access_token = localStorage.getItem('access_token');
+    let refresh_token = localStorage.getItem('refresh_token');
+    if(user && access_token && refresh_token) {
+      dispatch(fetchMovies({ }));
+    }
+  }, [dispatch]);
+
+  const movies = (moviesResponse?.data?.filter((movie) => movie.is_featured == true) || []) as Movie[];
+
+  const handleMovieDetail = (movieId: number) => {
+    navigate(`/home/${movieId}`);
+  }
 
   return (
     <>
@@ -75,7 +48,16 @@ const HomePage: React.FC = () => {
         className="media-slider mt-[60px] text-white relative"
         style={{ flex: 1, padding: '0 100px' }}
       >
-        <MediaSlider title="Trending Now" movies={movies} showIndex={true} />
+        {moviesLoading ? (
+          <div>Loading...</div>
+        ) : (
+          <MediaSlider 
+            title="Trending Now" 
+            movies={movies} 
+            showIndex={true}
+            onClick={handleMovieDetail}
+          />
+        )}
       </div>
 
       <div className="reason-join my-[50px] text-red-100 relative" style={{ flex: 1, padding: '0 100px' }}>

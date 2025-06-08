@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { showWarningToast } from '../utils/toast';
 import { useDispatch, useSelector } from 'react-redux';

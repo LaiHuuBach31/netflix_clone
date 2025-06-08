@@ -12,12 +12,25 @@ interface AuthState {
         roles: string[];
     } | null;
     loading: boolean;
-    error: string | null;
+    error: ErrorResponse | null;
 }
 
 interface LoginPayload {
     email: string;
     password: string;
+}
+
+interface RegisterPayload {
+    avatar: string;
+    name: string;
+    email: string;
+    password: string;
+}
+
+interface ErrorResponse {
+    status: boolean;
+    message: string;
+    errors: any ;
 }
 
 const initialState: AuthState = {
@@ -67,9 +80,9 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
             };
         }
     } catch (error: any) {
-        console.log('CheckAuth error:', error); 
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
         return rejectWithValue(error.response?.data?.message || 'Auth check failed');
     }
 });
@@ -80,13 +93,14 @@ export const refreshAccessToken = createAsyncThunk('auth/refreshAccessToken', as
         const { access_token, refresh_token, user } = response.data;
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         return {
             user,
             accessToken: access_token,
             refreshToken: refresh_token
         };
     } catch (error: any) {
-        console.log('RefreshAccessToken error:', error); 
+        console.log('RefreshAccessToken error:', error);
         if (error.response?.status === 401) {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
@@ -99,12 +113,10 @@ export const refreshAccessToken = createAsyncThunk('auth/refreshAccessToken', as
 export const loginAsync = createAsyncThunk('auth/login', async (credentials: LoginPayload, { rejectWithValue }) => {
     try {
         const response = await authService.login(credentials);
-        console.log('API Response:', response);
         const { access_token, refresh_token, user } = response.data;
         localStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);                
-        // localStorage.setItem('user', JSON.stringify(response.data.user));
-        console.log('User from API:', user);
+        localStorage.setItem('refresh_token', refresh_token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
 
         if (!user) {
             throw new Error('User data not found in response');
@@ -116,8 +128,30 @@ export const loginAsync = createAsyncThunk('auth/login', async (credentials: Log
             refreshToken: refresh_token
         };
     } catch (error: any) {
-        console.log('Login error:', error);
-        return rejectWithValue(error.message || error.response?.data?.message || 'Login failed');
+        console.log('error', error);
+        
+        return rejectWithValue(error.response.data || 'Login failed');
+    }
+});
+
+export const registerAsync = createAsyncThunk('auth/register', async (credentials: RegisterPayload, { rejectWithValue }) => {
+    try {
+        const response = await authService.register(credentials);
+        const { access_token, refresh_token, user } = response.data;
+
+        if (!user) {
+            throw new Error('User data not found in response');
+        }
+
+        return {
+            user,
+            accessToken: access_token,
+            refreshToken: refresh_token
+        };
+
+    } catch (error: any) {
+        console.log('Register error:', error.response.data);
+        return rejectWithValue(error.response.data || 'Login failed');
     }
 });
 
@@ -126,10 +160,10 @@ export const logoutAsync = createAsyncThunk('auth/logout', async (_, { rejectWit
         await authService.logout();
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        // localStorage.removeItem('user');
+        localStorage.removeItem('user');
         return true;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Logout failed');
+        return rejectWithValue(error.response.data.errors || 'Logout failed');
     }
 });
 
@@ -164,7 +198,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.user = null;
                 state.loading = false;
-                state.error = action.payload as string;
+                state.error = action.payload as ErrorResponse;
             })
             .addCase(refreshAccessToken.pending, (state) => {
                 state.loading = false;
@@ -182,7 +216,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.user = null;
                 state.loading = false;
-                state.error = action.payload as string;
+                state.error = action.payload as ErrorResponse;
             })
             .addCase(loginAsync.pending, (state) => {
                 state.loading = true;
@@ -200,7 +234,21 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.user = null;
                 state.loading = false;
-                state.error = action.payload as string;
+                state.error = action.payload as ErrorResponse;
+            })
+            .addCase(registerAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(registerAsync.fulfilled, (state, action) => {
+                state.user = action.payload.user;
+                state.loading = false;
+                localStorage.setItem('user', JSON.stringify(action.payload.user));
+            })
+            .addCase(registerAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as ErrorResponse;
+                localStorage.removeItem('user');
             })
             .addCase(logoutAsync.fulfilled, (state) => {
                 state.isAuthenticated = false;
@@ -212,7 +260,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.user = null;
                 state.loading = false;
-                state.error = action.payload as string;
+                state.error = action.payload as ErrorResponse;
             });
     },
 });

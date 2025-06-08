@@ -77,19 +77,19 @@ Route::group([
         Route::delete('/{id}', [GenreController::class, 'destroy'])->middleware('check.permission:delete_genre');
     });
 
+    Route::get('/plans', [PlanController::class, 'index']);
+    Route::get('/plans/{id}', [PlanController::class, 'show']);
     Route::group(['prefix' => 'plans', 'middleware' => ['auth:api']], function () {
-        Route::get('/', [PlanController::class, 'index'])->middleware('check.permission:get_plans');
-        Route::get('/{id}', [PlanController::class, 'show'])->middleware('check.permission:show_plan');
         Route::post('/', [PlanController::class, 'store'])->middleware('check.permission:create_plan');
         Route::put('/{id}', [PlanController::class, 'update'])->middleware('check.permission:update_plan');
         Route::delete('/{id}', [PlanController::class, 'destroy'])->middleware('check.permission:delete_plan');
     });
 
-    Route::group(['prefix' => 'upload', 'middleware' => ['auth:api']], function () {
-        Route::get('/preview', [FileUploadController::class, 'preview'])->middleware('check.permission:preview_upload');
-        Route::post('/image', [FileUploadController::class, 'uploadImage'])->middleware('check.permission:upload_image');
-        Route::post('/video', [FileUploadController::class, 'uploadVideo'])->middleware('check.permission:upload_video');
-        Route::delete('{filename}', [FileUploadController::class, 'deleteFile'])->middleware('check.permission:delete_file');
+    Route::group(['prefix' => 'upload'], function () {
+        Route::get('/preview', [FileUploadController::class, 'preview']);
+        Route::post('/image', [FileUploadController::class, 'uploadImage']);
+        Route::post('/video', [FileUploadController::class, 'uploadVideo']);
+        Route::delete('{filename}', [FileUploadController::class, 'deleteFile']);
     });
 
     Route::group(['prefix' => 'menus', 'middleware' => ['auth:api']], function () {
@@ -116,10 +116,10 @@ Route::group([
         Route::delete('/{id}', [BannerController::class, 'destroy'])->middleware('check.permission:delete_banner');
     });
 
+    Route::post('/subscriptions', [SubscriptionController::class, 'store']);
     Route::group(['prefix' => 'subscriptions', 'middleware' => ['auth:api']], function () {
         Route::get('/', [SubscriptionController::class, 'index'])->middleware('check.permission:get_subscriptions');
         Route::get('/{id}', [SubscriptionController::class, 'show'])->middleware('check.permission:show_subscription');
-        Route::post('/', [SubscriptionController::class, 'store'])->middleware('check.permission:create_subscription');
         Route::put('/{id}', [SubscriptionController::class, 'update'])->middleware('check.permission:update_subscription');
         Route::delete('/{id}', [SubscriptionController::class, 'destroy'])->middleware('check.permission:delete_subscription');
     });

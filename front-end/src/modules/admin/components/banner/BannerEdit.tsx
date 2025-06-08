@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { Banner, CreatePayload } from '../../services/bannerService';
 import { Button, Form, Input, Modal, Radio, Select, Spin, Upload, UploadFile, UploadProps } from 'antd';
 import ImgCrop from 'antd-img-crop';
@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import { deleteFile, uploadImage } from '../../store/uploadSlice';
 import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
-import { updateBanner } from '../../store/bannerSlice';
+import { fetchBanners, updateBanner } from '../../store/bannerSlice';
 import { fetchMovies } from '../../store/movieSlice';
 import { Movie } from '../../services/movieService';
 
@@ -25,7 +25,6 @@ type FieldType = {
 };
 
 const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose }) => {
-
   const [form] = useForm<FieldType>();
   const dispatch = useDispatch<AppDispatch>();
   const [bannerImage, setBannerImage] = useState<UploadFile | null>(null);
@@ -44,7 +43,7 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
         image: banner.image,
         movie_id: banner.movie_id,
         is_active: !!banner.is_active,
-      })
+      });
 
       if (banner.image) {
         setBannerImage({
@@ -83,7 +82,7 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
             filteredNewOptions.unshift({
               value: selectedMovie.id,
               label: selectedMovie.title,
-            })
+            });
           }
         }
         return [...prev, ...filteredNewOptions];
@@ -140,7 +139,7 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
       setCurrentPage(nextPage);
       dispatch(fetchMovies({ page: nextPage, keyword: searchKeyword }));
     }
-  }
+  };
 
   const onFinish = async (values: FieldType) => {
     try {
@@ -149,21 +148,23 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
         image: values.image || banner.image,
         movie_id: values.movie_id,
         is_active: values.is_active,
-      }
-      dispatch(updateBanner({ id: banner.id, data: payload })).unwrap();
+      };
+      await dispatch(updateBanner({ id: banner.id, data: payload })).unwrap();
       showSuccessToast('Banner updated successfully!');
       form.resetFields();
       setBannerImage(banner.image ? { url: banner.image, status: 'done' } as UploadFile : null);
+      dispatch(fetchBanners({ page: 1, keyword: '' }));
       onClose();
     } catch (error: any) {
       showErrorToast(error.message || 'Failed to update banner');
       if (values.image && values.image !== banner.image) await dispatch(deleteFile(values.image)).unwrap();
       form.resetFields();
     }
-  }
+  };
+
   const handleOk = () => {
     form.submit();
-  }
+  };
 
   return (
     <Modal
@@ -179,7 +180,7 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
           Cancel
         </Button>,
         <Button key="update" type="primary" onClick={handleOk}>
-          Create
+          Update
         </Button>,
       ]}
     >
@@ -198,8 +199,14 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
         </Form.Item>
         <Form.Item<FieldType> label="Banner Image" name="image" rules={[{ required: true, message: 'Please upload banner!' }]}>
           <ImgCrop rotationSlider>
-            <Upload listType="picture-card" fileList={bannerImage ? [bannerImage] : []} onChange={handleBannerChange} beforeUpload={() => false} maxCount={1}>
-              {banner ? null : '+ Upload'}
+            <Upload
+              listType="picture-card"
+              fileList={bannerImage ? [bannerImage] : []}
+              onChange={handleBannerChange}
+              beforeUpload={() => false}
+              maxCount={1}
+            >
+              {!bannerImage && '+ Upload'} 
             </Upload>
           </ImgCrop>
         </Form.Item>
@@ -223,7 +230,6 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
             ))}
           </Select>
         </Form.Item>
-
         <Form.Item<FieldType> label="Banner Status" name="is_active">
           <Radio.Group>
             <Radio value={true}>Active</Radio>
@@ -233,6 +239,6 @@ const BannerEdit: React.FC<BannerEditProps> = ({ isModalOpen, banner, onClose })
       </Form>
     </Modal>
   );
-}
+};
 
-export default BannerEdit
+export default BannerEdit;

@@ -5,7 +5,7 @@ interface RolePermissionState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedRolePermission: RolePermission | SingleResponse | null;
+    selectedRolePermission: RolePermission | null;
 }
 
 const initialState: RolePermissionState = {
@@ -121,7 +121,7 @@ const rolePermissionSlice = createSlice({
             })
             .addCase(createRolePermission.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedRolePermission = action.payload;
+                state.selectedRolePermission = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

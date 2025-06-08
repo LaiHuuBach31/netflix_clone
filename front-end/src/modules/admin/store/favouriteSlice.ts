@@ -5,7 +5,7 @@ interface FavouriteState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedFavourite: Favourite | SingleResponse | null;
+    selectedFavourite: Favourite | null;
 }
 
 const initialState: FavouriteState = {
@@ -121,7 +121,7 @@ const favouriteSlice = createSlice({
             })
             .addCase(createFavourite.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedFavourite = action.payload;
+                state.selectedFavourite = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

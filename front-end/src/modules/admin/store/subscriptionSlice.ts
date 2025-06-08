@@ -5,7 +5,7 @@ interface SubscriptionState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedSubscription: Subscription | SingleResponse | null;
+    selectedSubscription: Subscription | null;
 }
 
 const initialState: SubscriptionState = {
@@ -121,7 +121,7 @@ const subscriptionSlice = createSlice({
             })
             .addCase(createSubscription.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedSubscription = action.payload;
+                state.selectedSubscription = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

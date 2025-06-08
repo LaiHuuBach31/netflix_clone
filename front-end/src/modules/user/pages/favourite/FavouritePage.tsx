@@ -1,44 +1,55 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './favouritePage.css';
 import { Button, Col, Rate, Row, Select, Tag } from 'antd';
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { Option } from 'antd/es/mentions';
 import SectionHeader from '../../components/section/SectionHeader';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../../store';
+import useSelection from 'antd/es/table/hooks/useSelection';
+import { deleteFavourite, fetchFavourites } from '../../../admin/store/favouriteSlice';
+import { showSuccessToast } from '../../../../utils/toast';
 
-const movies = [
-  {
-    id: 1,
-    title: 'Lời Thề Nguyện Ánh Trăng',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-    badge: 'Top 5',
-  },
-  {
-    id: 2,
-    title: 'Hốn Ma Học Đường (Phần 1)',
-    image: 'https://occ-0-3687-58.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABaXp51GeqmxqBq5ors3pR1YbCvPrYSRlEzf_uBel_vEYF0PABMM2cDJy9kUO1SnM9s3EJVYaAbamh2cXCWf8p38osPWcXYFKwSS0e7ADVm94ZbEuKXXZL0VF09Th9zm9hFAEQe5M2MhG2hA3ycdAoHFaroertXe1K1BDTeGrG0KaWcaS76wJcVDLlIV8pE5wtnmnoZ14Wb5CkA4d.webp?r=153',
-    badge: 'Hoàn Tất (8t)',
-  },
-  {
-    id: 3,
-    title: 'Đấu Phá Thương Khung Ngoại Truyện',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-    badge: 'Top 142',
-  },
-  {
-    id: 4,
-    title: 'Gia đình Tiểu Mẫn',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-    badge: 'Top 9',
-  },
-  {
-    id: 5,
-    title: 'Cesium Fallout',
-    image: 'https://occ-0-325-395.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABa5bAzDWiD-KKBZx2hvKqr-gTWoanPQkSfnnhe20YjI3mfL0T7182yQg4wbwLK-NmtUpcEe-UITcIOJ8sFQfqUYE7JkUQyVdvweXJjnBdApRP6Yul3U9_Cm9JxqJiL8W3v9WAokiTFOjem0n-pvt.webp?r=bf9',
-    badge: 'Full',
-  },
-];
 
 function FavouritePage() {
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { response: favouriteResponse, loading: favoriteLoading } = useSelector((state: RootState) => state.favourite);
+
+  useEffect(() => {
+    dispatch(fetchFavourites({ page: 1, keyword: '' }));
+  }, [dispatch]);
+  
+  let userId: number | null = null;
+  const user = localStorage.getItem('user');
+  if (user) {
+    try {
+      const parsedUser = JSON.parse(user);
+      userId = parsedUser.id; 
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+    }
+  }
+  
+  const movieFavourites = favouriteResponse?.data.filter((movie) => movie.user_id == userId) || [];
+
+  const handleDeleteMovieFavourite = (movieId: number) => {
+    dispatch(deleteFavourite(movieId))
+      .then((response => {
+        showSuccessToast('Delete Success');
+        dispatch(fetchFavourites({ page: 1, keyword: '' }));
+      }))
+      .catch(() => {
+        showSuccessToast('Delete Faild');
+      });
+  }
+
+  const handleMovieDetail = (movieId : number) => {
+    navigate(`/favourite/${movieId}`);
+  }
+
   return (
     <>
       <div className='favorite' style={{ flex: 1, padding: '0 100px' }}>
@@ -46,21 +57,24 @@ function FavouritePage() {
         <SectionHeader title="Favorite" showSelect={true} />
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
-          {movies.map((movie) => (
-            <div key={movie.id} className="relative text-white">
+          {movieFavourites.map((movieFavorite) => (
+            <div key={movieFavorite.id} className="relative text-white" onClick={() => handleMovieDetail(movieFavorite.movie_id)}>
               <img
-                src={movie.image}
-                alt={movie.title}
+                src={movieFavorite?.movie?.thumbnail}
+                alt={movieFavorite?.movie?.title}
                 className="w-full h-[220px] object-cover rounded-md"
               />
               <div
                 className={`absolute top-1 left-1 px-1.5 py-0.5 text-xs font-bold text-white rounded-sm bg-red-500`}
               >
-                {movie.badge}
+                HOT
               </div>
-              <CloseCircleOutlined className="absolute top-1 right-1 text-red-500 text-xl cursor-pointer" />
+              <CloseCircleOutlined
+                className="absolute top-1 right-1 text-red-500 text-xl cursor-pointer"
+                onClick={() => handleDeleteMovieFavourite(movieFavorite.id)}
+              />
               <p className="text-sm text-center mt-2 font-medium line-clamp-2 min-h-[3rem]">
-                {movie.title}
+                {movieFavorite.movie.title}
               </p>
             </div>
           ))}

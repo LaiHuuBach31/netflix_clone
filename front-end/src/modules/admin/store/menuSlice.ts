@@ -5,7 +5,7 @@ interface MenuState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedMenu: Menu | SingleMenuResponse | null;
+    selectedMenu: Menu | null;
 }
 
 const initialState: MenuState = {
@@ -118,7 +118,7 @@ const menuSlice = createSlice({
             })
             .addCase(createMenu.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedMenu = action.payload;
+                state.selectedMenu = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

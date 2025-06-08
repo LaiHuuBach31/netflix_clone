@@ -5,7 +5,7 @@ interface BannerState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedBanner: Banner | SingleResponse | null;
+    selectedBanner: Banner | null;
 }
 
 const initialState: BannerState = {
@@ -121,7 +121,7 @@ const bannerSlice = createSlice({
             })
             .addCase(createBanner.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedBanner = action.payload;
+                state.selectedBanner = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }

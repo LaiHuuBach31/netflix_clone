@@ -5,7 +5,8 @@ interface MovieState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedMovie: Movie | SingleResponse | null;
+    selectedMovie: Movie | null;
+    fetchingId: number | null;
 }
 
 const initialState: MovieState = {
@@ -13,6 +14,7 @@ const initialState: MovieState = {
     loading: false,
     error: null,
     selectedMovie: null,
+    fetchingId: null
 }
 
 export const fetchMovies = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
@@ -68,7 +70,7 @@ export const deleteMovie = createAsyncThunk<number, number, { rejectValue: Error
         try {
             const response = await movieService.deleteMovie(id);
             console.log(response);
-            
+
             return id;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -82,7 +84,10 @@ const movieSlice = createSlice({
     reducers: {
         setSelectedMovie(state, action: { payload: Movie | null }) {
             state.selectedMovie = action.payload;
-        }
+        },
+        setFetchingId(state, action: { payload: number | null }) {
+            state.fetchingId = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -101,17 +106,21 @@ const movieSlice = createSlice({
             })
 
             // fetch by id
-            .addCase(fetchMovieById.pending, (state) => {
+            .addCase(fetchMovieById.pending, (state, action) => {
                 state.loading = true;
                 state.error = null;
+                state.selectedMovie = null;
+                state.fetchingId = action.meta.arg;
             })
             .addCase(fetchMovieById.fulfilled, (state, action) => {
                 state.loading = false;
                 state.selectedMovie = action.payload;
+                state.fetchingId = null;
             })
             .addCase(fetchMovieById.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
+                state.fetchingId = null;
             })
 
             // create
@@ -121,7 +130,7 @@ const movieSlice = createSlice({
             })
             .addCase(createMovie.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedMovie = action.payload;
+                state.selectedMovie = action.payload.data;
                 if (state.response) {
                     state.response.data.push(action.payload.data);
                 }
@@ -167,5 +176,5 @@ const movieSlice = createSlice({
     }
 });
 
-export const {} = movieSlice.actions;
+export const { setSelectedMovie, setFetchingId } = movieSlice.actions;
 export default movieSlice.reducer;

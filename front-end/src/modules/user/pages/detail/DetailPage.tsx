@@ -1,11 +1,78 @@
 import { Button, Rate, Tag } from 'antd'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import SectionHeader from '../../components/section/SectionHeader'
 import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../../store';
+import { fetchMovieById, setSelectedMovie } from '../../../admin/store/movieSlice';
+import { HeartOutlined } from '@ant-design/icons';
+import { createFavourite, deleteFavourite, fetchFavourites } from '../../../admin/store/favouriteSlice';
+import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
 
-const DetailPage:React.FC = () => {
+const DetailPage: React.FC = () => {
 
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
+    const dispatch = useDispatch<AppDispatch>();
+    const { selectedMovie: movie, loading: moviesLoading, fetchingId } = useSelector((state: RootState) => state.movie);
+    const { response: favouriteResponse } = useSelector((state: RootState) => state.favourite);
+
+
+    useEffect(() => {
+        if (id) {
+            dispatch(fetchMovieById(Number(id)));
+        }
+
+        return () => {
+            dispatch(setSelectedMovie(null));
+        };
+    }, [dispatch, id]);
+
+
+    // if (moviesLoading || fetchingId === Number(id)) {
+    //     return <div className="text-white text-center py-6">Loading...</div>;
+    // }
+
+
+    let userId: number | null = null;
+    const user = localStorage.getItem('user');
+    if (user) {
+        try {
+            const parsedUser = JSON.parse(user);
+            userId = parsedUser.id;
+        } catch (error) {
+            console.error('Error parsing user from localStorage:', error);
+        }
+    }
+
+    const isFavourite = userId && id && favouriteResponse?.data
+            ? favouriteResponse.data.some((fav) => fav.user_id == userId && fav.movie_id == Number(id))
+            : false;
+                
+    const handleAddMovieFavourite = () => {
+        if (userId && id) {
+            // if(favourite){
+            //     dispatch(deleteFavourite(favourite[0].id))
+            //         .unwrap()
+            //         .then(() => {
+            //             showSuccessToast('Removed from favourites');
+            //             dispatch(fetchFavourites({ page: 1, keyword: '' })); 
+            //         })
+            //         .catch(() => {
+            //             showErrorToast('Failed to remove from favourites');
+            //         });
+            // } else{
+            dispatch(createFavourite({ user_id: userId, movie_id: Number(id) })).unwrap()
+                .then((result) => {
+                    showSuccessToast(result.message);
+                })
+                .catch(() => {
+                    showErrorToast('Already exists in the list');
+                });
+            // }
+        } else {
+            showErrorToast('Faild');
+        }
+    }
 
     return (
         <>
@@ -19,7 +86,7 @@ const DetailPage:React.FC = () => {
                         <div className="w-full md:w-[200px] flex-shrink-0">
                             <div className="relative">
                                 <div>
-                                    <img src="https://occ-0-3687-58.1.nflxso.net/dnm/api/v6/-klpX4b1RECP-oGX3Uvz90PrgHE/AAAABaXp51GeqmxqBq5ors3pR1YbCvPrYSRlEzf_uBel_vEYF0PABMM2cDJy9kUO1SnM9s3EJVYaAbamh2cXCWf8p38osPWcXYFKwSS0e7ADVm94ZbEuKXXZL0VF09Th9zm9hFAEQe5M2MhG2hA3ycdAoHFaroertXe1K1BDTeGrG0KaWcaS76wJcVDLlIV8pE5wtnmnoZ14Wb5CkA4d.webp?r=153" alt="" />
+                                    <img src={movie?.thumbnail} alt="" height={100} />
                                 </div>
                                 <div className="absolute bottom-1 left-1 text-xs bg-black/50 text-white px-1 rounded">
                                     Vietsub
@@ -30,31 +97,28 @@ const DetailPage:React.FC = () => {
                         <div className="flex-1 space-y-4">
                             <div>
                                 <h1 className="text-xl md:text-2xl font-bold">
-                                    When Life Gives You Tangerines
+                                    {movie?.title}
                                 </h1>
                                 <p className="text-sm italic text-gray-400">
-                                    Legends of the Condor Heroes: The Gallants
+                                    {movie?.title}
                                 </p>
                             </div>
 
                             <p className="text-sm text-gray-300">
-                                Under Genghis Khan, the Mongolian army pushes west to destroy the Jin Dynasty,
-                                setting its sights on the Song Dynasty next. Amid internal conflicts among martial
-                                arts schools, Guo Jing unites the Central Plains' warriors to defend Xiangyang,
-                                embodying courage and loyalty in the fight for the nation.
+                                {movie?.description}
                             </p>
 
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-1 text-sm">
                                 <span><strong>Type:</strong> single</span>
                                 <span><strong>Produced:</strong> 2025</span>
-                                <span><strong>Country:</strong> Trung Quốc</span>
+                                <span><strong>Country:</strong> Global</span>
                                 <span><strong>Status:</strong> trailer</span>
-                                <span><strong>Date update:</strong> 13/04/2025 17:28:06</span>
+                                <span><strong>Date update:</strong> {movie?.release_year}</span>
                                 <span><strong>Episode:</strong> Trailer</span>
-                                <span><strong>Genre:</strong> <Tag color="blue">Hành Động</Tag> <Tag color="green">Chính kịch</Tag></span>
+                                <span><strong>Genre:</strong> <Tag color="green">{movie?.genre?.name}</Tag></span>
                                 <span><strong>Duration:</strong> 147 phút</span>
                                 <span><strong>Quality:</strong> HD</span>
-                                <span><strong>Views:</strong> 0</span>
+                                <span><strong>Views:</strong> 10000</span>
                             </div>
 
                             <div className="flex items-center gap-2 text-yellow-400">
@@ -63,23 +127,29 @@ const DetailPage:React.FC = () => {
                             </div>
 
                             <div className="flex gap-2 pt-2">
-                                <Button type="primary" danger className="font-bold">THEO DÕI</Button>
-                                <Button className="bg-red-600 text-white font-bold hover:bg-red-700">XEM TRAILER</Button>
-                                <Button className="bg-red-600 text-white font-bold hover:bg-red-700">XEM NGAY</Button>
+                                <Button className="bg-red-600 text-white font-bold hover:bg-red-700">WATCH TRAILER</Button>
+                                <Button className="bg-red-600 text-white font-bold hover:bg-red-700">WATCH NOW</Button>
+                                <Button
+                                    className={`font-bold ${isFavourite ? 'bg-red-500 text-white-500cd' : 'bg-white text-red-500'}`}
+                                    onClick={handleAddMovieFavourite}
+                                >
+                                    <HeartOutlined />
+                                </Button>
+
                             </div>
                         </div>
                     </div>
 
                     <div className="mt-12 border-t border-[#3b3b5b] pt-6">
-                        <h3 className="text-white font-bold uppercase text-sm">Bình luận</h3>
-                        <p className="text-sm text-gray-400 mt-2">Chưa có bình luận nào</p>
-                        <Button className="mt-2 bg-red-600 text-white font-bold">Đăng nhập</Button>
+                        <h3 className="text-white font-bold uppercase text-sm">COMMENT</h3>
+                        <p className="text-sm text-gray-400 mt-2">NO COMMENT</p>
+                        <Button className="mt-2 bg-red-600 text-white font-bold">LOGIN</Button>
                     </div>
 
                     <div className="mt-12 border-t border-[#3b3b5b] pt-6">
                         <h3 className="text-white font-bold uppercase text-sm">YOU MIGHT LIKE...</h3>
                         <p className="text-sm text-gray-400 mt-2">
-                            Chưa có phim phù hợp
+                            No suitable movies yet
                         </p>
                     </div>
                 </div>

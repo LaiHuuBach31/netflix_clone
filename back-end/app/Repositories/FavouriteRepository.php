@@ -32,4 +32,9 @@ class FavouriteRepository extends BaseRepository{
             ]
         );
     }
+
+    public function checkFavourite($user_id, $movie_id)
+    {
+        return $this->model->where('user_id', $user_id)->where('movie_id', $movie_id)->first();
+    }
 }

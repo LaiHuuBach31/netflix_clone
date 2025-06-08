@@ -1,4 +1,5 @@
 import UserLayout from "../../../layout/UserLayout";
+import ProtectedRoute from "../../../routes/ProtectedRoute";
 import DetailPage from "../pages/detail/DetailPage";
 import FavoritePage from "../pages/favourite/FavouritePage";
 import HomePage from "../pages/home/HomePage";
@@ -11,13 +12,43 @@ const UserRoute = [{
     path: '/',
     element: <UserLayout />,
     children: [
-        {index: true, element: <HomePage /> },
-        {path: '/profile', element: <ProfilePage /> },
-        {path: '/favourite', element: <FavoritePage /> },
-        {path: '/movies', element: <MoviesPage /> },
-        {path: '/movies/:id', element: <DetailPage /> },
-        {path: '/tv-show', element: <TVShowPage /> },
-        {path: '/recently-added', element: <RecentlyAddedPage /> },
+        { index: true, element: <HomePage /> },
+        {
+            path: '/home',
+            children: [
+                { index: true, element: <HomePage /> },                
+                { path: ':id', element: <DetailPage /> }, 
+            ],
+        },
+        { path: '/profile', element: <ProfilePage /> },
+        {
+            path: '/favourite',
+            children: [
+                { index: true, element: <FavoritePage /> },
+                { path: ':id', element: <DetailPage /> },
+            ]
+        },
+        {
+            path: '/movies',
+            children: [
+                { index: true, element: <MoviesPage /> },
+                { path: ':id', element: <DetailPage /> },
+            ]
+        },
+        {
+            path: '/tv-show',
+            children: [
+                { index: true, element: <TVShowPage /> },
+                { path: ':id', element: <DetailPage /> },
+            ]
+        },
+        {
+            path: '/recently-added',
+            children: [
+                { index: true, element: <RecentlyAddedPage /> },
+                { path: ':id', element: <DetailPage /> },
+            ]
+        },
     ]
 }]
 

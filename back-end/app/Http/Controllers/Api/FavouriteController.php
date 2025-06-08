@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\CreationFailedException;
 use App\Services\FavouriteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -12,7 +13,7 @@ class FavouriteController extends BaseController
 
     public function __construct(FavouriteService $favouriteService)
     {
-        $this->favouriteService = $favouriteService;
+        $this->favouriteService = $favouriteService;    
     }
 
     public function index(Request $request)
@@ -38,9 +39,10 @@ class FavouriteController extends BaseController
         try {
             $favourite = $this->favouriteService->createFavourite($data);
             return $this->createdResponse($favourite, 'Favourite created successfully');
-        } catch (ValidationException $e) {
-            return $this->handleValidationException($e);
         }
+         catch (ValidationException $e) {
+            return $this->handleValidationException($e);
+        } 
     }
 
     public function update(Request $request, int $id)

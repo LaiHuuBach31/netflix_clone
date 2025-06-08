@@ -36,7 +36,7 @@ class UserService extends BaseService
             'name' => $data['name'],
             'avatar' => $data['avatar'],
             'email' => $data['email'],
-            'status' => $data['status'],
+            'status' => true,
             'password' => bcrypt($data['password']),
         ];
         $dto = new UserDTO($data, true);

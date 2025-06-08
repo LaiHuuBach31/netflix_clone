@@ -6,7 +6,7 @@ interface PermissionState {
     response: DataResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
-    selectedPermission: Permission | SingleResponse | null;
+    selectedPermission: Permission | null;
 }
 
 const initialState: PermissionState = {
@@ -122,7 +122,7 @@ const permissionSlice = createSlice({
             })
             .addCase(createPermission.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPermission = action.payload;
+                state.selectedPermission = action.payload.data;
                 if (state.response && state.response.data) {
                     state.response.data.push(action.payload.data);
                 }
