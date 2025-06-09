@@ -49,7 +49,7 @@ Route::group([
         Route::post('/import', [UserController::class, 'import'])->middleware('check.permission:import_user');
         Route::get('/{id}', [UserController::class, 'show'])->middleware('check.permission:show_user');
         Route::post('/', [UserController::class, 'store'])->middleware('check.permission:create_user');
-        Route::put('/{id}', [UserController::class, 'update'])->middleware('check.permission:update_user');
+        Route::patch('/{id}', [UserController::class, 'update'])->middleware('check.permission:update_user');
         Route::delete('/{id}', [UserController::class, 'destroy'])->middleware('check.permission:delete_user');
     });
 
@@ -178,5 +178,10 @@ Route::group([
         Route::post('/', [RolePermissionController::class, 'store'])->middleware('check.permission:create_role_permission');
         Route::put('/{id}', [RolePermissionController::class, 'update'])->middleware('check.permission:update_role_permission');
         Route::delete('/{id}', [RolePermissionController::class, 'destroy'])->middleware('check.permission:delete_role_permission');
+    });
+
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::patch('/auth/profile', [AuthController::class, 'updateProfile']);
+        Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
     });
 });

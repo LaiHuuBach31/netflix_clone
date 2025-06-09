@@ -48,7 +48,7 @@ const HomePage: React.FC = () => {
         className="media-slider mt-[60px] text-white relative"
         style={{ flex: 1, padding: '0 100px' }}
       >
-        {moviesLoading ? (
+        {/* {moviesLoading ? (
           <div>Loading...</div>
         ) : (
           <MediaSlider 
@@ -57,7 +57,7 @@ const HomePage: React.FC = () => {
             showIndex={true}
             onClick={handleMovieDetail}
           />
-        )}
+        )} */}
       </div>
 
       <div className="reason-join my-[50px] text-red-100 relative" style={{ flex: 1, padding: '0 100px' }}>

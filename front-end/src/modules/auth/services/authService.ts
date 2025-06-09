@@ -52,6 +52,13 @@ interface Response {
     data: []
 }
 
+interface UpdateProfileRequest {
+    name: string;
+    email: string;
+    avatar?: string;
+    roles?: string[];
+}
+
 const authService = {
     // login
     login: async (data: LoginRequest): Promise<AuthResponse> => {
@@ -131,6 +138,25 @@ const authService = {
             return response.data;
         } catch (error: any) {
             console.error('Refresh error:', error);
+            if (error.response) {
+                console.error('Status:', error.response.status);
+                console.error('Data:', error.response.data);
+            }
+            throw error;
+        }
+    },
+
+    updateProfile: async (data: UpdateProfileRequest): Promise<UserResponse> => {
+        try {
+            const response = await api.patch<UserResponse>('/auth/profile', data);
+            if (response.data.status === true) {
+                const { name, email, avatar } = response.data.data;
+                const updatedUser = { id: response.data.data.id, name, email, avatar };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+            }
+            return response.data;
+        } catch (error: any) {
+            console.error('Update profile error:', error);
             if (error.response) {
                 console.error('Status:', error.response.status);
                 console.error('Data:', error.response.data);

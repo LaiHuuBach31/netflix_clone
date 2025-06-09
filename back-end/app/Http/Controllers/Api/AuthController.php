@@ -174,7 +174,7 @@ class AuthController extends Controller
                 ->where('expires_at', '>', now())
                 ->first();
 
-                if (!$tokenRecord) {
+            if (!$tokenRecord) {
                 return $this->unauthorizedResponse([], 'Invalid or expired refresh token');
             }
 
@@ -239,4 +239,56 @@ class AuthController extends Controller
             return $this->unauthorizedResponse([], 'Failed to get user');
         }
     }
+
+    public function updateProfile(Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return $this->unauthorizedResponse([], 'User not authenticated');
+            }
+
+            if ($request->password) {
+                $password = $request->password;
+            } else {
+                $password = $user->password;
+            }
+
+            $data = array_merge(
+                ['id' => $user->id],
+                [
+                    "name" => $request->name,
+                    "avatar" => $request->avatar,
+                    "email" => $request->email,
+                    "status" => true,
+                    'password' => $password,
+                ]
+            );
+
+            $updatedUser = $this->userService->updateUser($user->id, $data);
+            $user = User::find($updatedUser->id);
+            $roles = $user->roles->pluck('name');
+
+            $userDto = new UserDTO([
+                'id' => $updatedUser->id,
+                'name' => $updatedUser->name,
+                'avatar' => $updatedUser->avatar,
+                'email' => $updatedUser->email,
+                'roles' => $roles,
+            ]);
+
+            DB::commit();
+            return $this->successResponse($userDto, 'Profile updated successfully');
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return $this->unprocessableResponse($e->errors(), 'Validation failed');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse([], 'Internal Server Error: ' . $e->getMessage());
+        }
+    }
+
+    public function changePassword(Request $request) {}
 }

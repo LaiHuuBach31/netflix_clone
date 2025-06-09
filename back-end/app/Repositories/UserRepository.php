@@ -12,15 +12,14 @@ class UserRepository extends BaseRepository{
 
     public function createOrUpdate(array $data): User
     {
+        $id = $data['id'] ?? null;
+        $filteredData = array_filter($data, fn($key) => $key !== 'id', ARRAY_FILTER_USE_KEY);
+        if (!isset($filteredData['password'])) {
+            unset($filteredData['password']);
+        }
         return $this->model->updateOrCreate(
-            ['id' => $data['id'] ?? null],
-            [
-                'name' => $data['name'],
-                'avatar' => $data['avatar'],
-                'email' => $data['email'],
-                'status' => $data['status'],
-                'password' => $data['password'],
-            ]
+            ['id' => $id],
+            $filteredData
         );
     }
 

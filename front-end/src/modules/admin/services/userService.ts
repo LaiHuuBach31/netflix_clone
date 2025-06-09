@@ -115,7 +115,7 @@ const userService = {
 
     updateUser: async (id: number, data: Partial<User>): Promise<SingleResponse> => {
         try {
-            const response = await api.put<SingleResponse>(`/users/${id}`, data);
+            const response = await api.patch<SingleResponse>(`/users/${id}`, data);
             return response.data;
         } catch (error: any) {
             throw error.response?.data as ErrorResponse || "Failed to update user";

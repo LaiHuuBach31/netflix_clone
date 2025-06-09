@@ -30,7 +30,7 @@ interface RegisterPayload {
 interface ErrorResponse {
     status: boolean;
     message: string;
-    errors: any ;
+    errors: any;
 }
 
 const initialState: AuthState = {
@@ -129,7 +129,7 @@ export const loginAsync = createAsyncThunk('auth/login', async (credentials: Log
         };
     } catch (error: any) {
         console.log('error', error);
-        
+
         return rejectWithValue(error.response.data || 'Login failed');
     }
 });
@@ -166,6 +166,18 @@ export const logoutAsync = createAsyncThunk('auth/logout', async (_, { rejectWit
         return rejectWithValue(error.response.data.errors || 'Logout failed');
     }
 });
+
+export const updateProfile = createAsyncThunk(
+    'auth/updateProfile',
+    async (data: { name: string; email: string; avatar?: string }, { rejectWithValue }) => {
+        try {
+            const response = await authService.updateProfile(data);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data || 'Update failed');
+        }
+    }
+);
 
 const authSlice = createSlice({
     name: 'auth',
@@ -261,7 +273,20 @@ const authSlice = createSlice({
                 state.user = null;
                 state.loading = false;
                 state.error = action.payload as ErrorResponse;
-            });
+            }).addCase(updateProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = { ...state.user, ...action.payload.data };
+                localStorage.setItem('user', JSON.stringify(state.user));
+            })
+            .addCase(updateProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as ErrorResponse;
+            })
+
     },
 });
 

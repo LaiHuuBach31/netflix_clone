@@ -6,7 +6,7 @@ use Illuminate\Validation\ValidationException;
 
 class UserDTO extends BaseDTO{
     public function __construct(array $data, bool $validate = false) {
-        
+
         if($validate){
             $id = $data['id'] ?? null;
             $validator = Validator::make($data, [
