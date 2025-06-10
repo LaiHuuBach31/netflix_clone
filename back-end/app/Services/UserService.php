@@ -46,16 +46,6 @@ class UserService extends BaseService
 
     public function updateUser(int $id, array $data)
     {
-        // $data = array_merge(
-        //     ['id' => $id],
-        //     [
-        //         'name' => $data['name'],
-        //         'avatar' => $data['avatar'],
-        //         'email' => $data['email'],
-        //         'status' => $data['status'],
-        //         'password' => bcrypt($data['password']),
-        //     ]
-        // );
         $dto = new UserDTO($data, true);
         $updated = parent::update($id, $dto);
         return UserMapper::fromModel($updated);

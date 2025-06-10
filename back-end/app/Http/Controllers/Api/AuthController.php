@@ -290,5 +290,77 @@ class AuthController extends Controller
         }
     }
 
-    public function changePassword(Request $request) {}
+    public function changePassword(Request $request) {
+        try {
+            $user = Auth::user();
+            if(!$user){
+                return $this->unauthorizedResponse([], 'User not authenticated');
+            }
+
+            $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:6|confirmed',
+            ], [
+                'current_password.required' => 'The current password is required.',
+                'new_password.required' => 'The new password is required.',
+                'new_password.min' => 'The new password must be at least 6 characters.',
+                'new_password.confirmed' => 'The new password and confirmation do not match.',
+            ]);
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return $this->unauthorizedResponse([], 'Current password is incorrect.');
+            }
+
+             $data = array_merge(
+                ['id' => $user->id],
+                [
+                    "name" => $user->name,
+                    "avatar" => $user->avatar,
+                    "email" => $user->email,
+                    "status" => true,
+                    'password' => bcrypt($request->new_password),
+                ]
+            );
+           
+            $updatedUser = $this->userService->updateUser($user->id, $data);
+            $user = User::find($updatedUser->id);
+            $roles = $user->roles->pluck('name');
+
+            $userDto = new UserDTO([
+                'id' => $updatedUser->id,
+                'name' => $updatedUser->name,
+                'avatar' => $updatedUser->avatar,
+                'email' => $updatedUser->email,
+                'roles' => $roles,
+            ]);
+
+            DB::table('refresh_tokens')->where('user_id', $user->id)->delete();
+            $newToken = Auth::login($user);
+            $newRefreshToken = bin2hex(random_bytes(40));
+            DB::table('refresh_tokens')->insert([
+                'token' => $newRefreshToken,
+                'user_id' => $user->id,
+                'expires_at' => now()->addDays(7),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::commit();
+            return $this->successResponse([
+                'access_token' => $newToken,
+                'refresh_token' => $newRefreshToken,
+                'token_type' => 'Bearer',
+                'expires_in' => config('jwt.ttl') * 60,
+                'user' => $userDto,
+            ], 'Password changed successfully');
+
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return $this->unprocessableResponse($e->errors(), 'Validation failed');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse([], 'Internal Server Error: ' . $e->getMessage());
+        }
+    }
+
 }

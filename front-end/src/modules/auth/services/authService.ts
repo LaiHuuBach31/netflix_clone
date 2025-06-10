@@ -59,6 +59,12 @@ interface UpdateProfileRequest {
     roles?: string[];
 }
 
+interface ChangePasswordRequest {
+    current_password: string;
+    new_password: string;
+    new_password_confirmation: string;
+}
+
 const authService = {
     // login
     login: async (data: LoginRequest): Promise<AuthResponse> => {
@@ -157,6 +163,28 @@ const authService = {
             return response.data;
         } catch (error: any) {
             console.error('Update profile error:', error);
+            if (error.response) {
+                console.error('Status:', error.response.status);
+                console.error('Data:', error.response.data);
+            }
+            throw error;
+        }
+    },
+
+    changePassword: async (data: ChangePasswordRequest): Promise<AuthResponse> => {
+        try {
+            const response = await api.post<AuthResponse>('/auth/change-password', data);
+            if (response.data.status === true) {
+                const { access_token, refresh_token, user } = response.data.data;
+                if (access_token && refresh_token) {
+                    localStorage.setItem('access_token', access_token);
+                    localStorage.setItem('refresh_token', refresh_token);
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+            }
+            return response.data;
+        } catch (error: any) {
+            console.error('Change password error:', error);
             if (error.response) {
                 console.error('Status:', error.response.status);
                 console.error('Data:', error.response.data);

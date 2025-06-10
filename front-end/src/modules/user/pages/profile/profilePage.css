@@ -59,3 +59,53 @@
     background-color: #b91c1c !important;
     border-color: #b91c1c !important;
 }
+.profile-page-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.avatar-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid #333;
+}
+
+.avatar-section {
+    width: 100%;
+    text-align: center;
+}
+
+.user-info {
+    margin-top: 20px;
+}
+
+.form-column {
+    padding: 20px;
+}
+
+.form-section {
+    width: 100%;
+}
+
+.custom-input {
+    background-color: #2a2a2a;
+    border-radius: 4px;
+}
+
+.ant-btn-primary {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.ant-btn-primary:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+}

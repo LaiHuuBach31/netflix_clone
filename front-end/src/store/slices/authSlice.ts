@@ -27,6 +27,12 @@ interface RegisterPayload {
     password: string;
 }
 
+interface ChangePasswordPayload {
+    current_password: string;
+    new_password: string;
+    new_password_confirmation: string;
+}
+
 interface ErrorResponse {
     status: boolean;
     message: string;
@@ -179,6 +185,18 @@ export const updateProfile = createAsyncThunk(
     }
 );
 
+export const changePassword = createAsyncThunk(
+    'auth/changePassword',
+    async (data: ChangePasswordPayload, { rejectWithValue }) => {
+        try {
+            const response = await authService.changePassword(data);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.response.data || 'Password change failed');
+        }
+    }
+);
+
 const authSlice = createSlice({
     name: 'auth',
     initialState: initialState,
@@ -286,7 +304,21 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as ErrorResponse;
             })
-
+            .addCase(changePassword.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(changePassword.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload.data.user as AuthState['user'];
+                localStorage.setItem('user', JSON.stringify(state.user));
+                localStorage.setItem('access_token', action.payload.data.access_token);
+                localStorage.setItem('refresh_token', action.payload.data.refresh_token);
+            })
+            .addCase(changePassword.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as ErrorResponse;
+            });
     },
 });
 
