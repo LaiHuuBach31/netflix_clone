@@ -314,7 +314,7 @@ class AuthController extends Controller
              $data = array_merge(
                 ['id' => $user->id],
                 [
-                    "name" => $user->name,
+                    "name" => $user->name,  
                     "avatar" => $user->avatar,
                     "email" => $user->email,
                     "status" => true,

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\EpisodesController;
 use App\Http\Controllers\Api\FavouriteController;
 use App\Http\Controllers\Api\FileUploadController;
 use App\Http\Controllers\Api\GenreController;
@@ -106,6 +107,14 @@ Route::group([
         Route::post('/', [MovieController::class, 'store'])->middleware('check.permission:create_movie');
         Route::put('/{id}', [MovieController::class, 'update'])->middleware('check.permission:update_movie');
         Route::delete('/{id}', [MovieController::class, 'destroy'])->middleware('check.permission:delete_movie');
+    });
+
+     Route::group(['prefix' => 'episodes', 'middleware' => ['auth:api']], function () {
+        Route::get('/', [EpisodesController::class, 'index'])->middleware('check.permission:get_episodes');
+        Route::get('/{id}', [EpisodesController::class, 'show'])->middleware('check.permission:show_episode');
+        Route::post('/', [EpisodesController::class, 'store'])->middleware('check.permission:create_episode');
+        Route::put('/{id}', [EpisodesController::class, 'update'])->middleware('check.permission:update_episode');
+        Route::delete('/{id}', [EpisodesController::class, 'destroy'])->middleware('check.permission:delete_episodes');
     });
 
     Route::group(['prefix' => 'banners', 'middleware' => ['auth:api']], function () {
