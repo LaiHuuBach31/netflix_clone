@@ -1,4 +1,6 @@
+import axios from "axios";
 import api from "../../../services/api";
+import { MovieApiResponse } from "./movieService";
 
 export interface Genre {
     id: number;
@@ -57,7 +59,46 @@ export interface ErrorResponse {
     };
 }
 
+// api genre from ophim1
+export interface GenreItem {
+    id: string;
+    name: string;
+    slug: string;
+}
+
+export interface GenreItemResponse {
+  status: string; 
+  message: string;
+  data: {
+    items: GenreItem[];
+  };
+}
+
+export interface ErrorResponseO {
+  status: boolean;  
+    msg: string;
+}
+
 const genreService = {
+
+    getAllGenres: async (): Promise<GenreItemResponse> => {
+        try {
+            const response = await axios.get<GenreItemResponse>('https://ophim1.com/v1/api/the-loai');
+            return response.data;
+        } catch (error:any) {
+            throw error.response?.data as ErrorResponse || 'Failed to get all genres';
+        }
+    },
+
+    getMovieByGenre: async (slug: string, page: number = 1): Promise<MovieApiResponse> => { 
+        try {
+            const response = await axios.get<MovieApiResponse>(`https://ophim1.com/v1/api/the-loai/${slug}`, { params: { page } });
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data as ErrorResponse || 'Failed to get movies by genre';
+        }
+    },
+
     getGenres: async (page: number = 1, keyword: string = ''): Promise<GenreResponse> => {
         try {
             const response = await api.get<GenreResponse>('/genres', { params: { page, search: keyword || undefined } });

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import genreService from "../services/genreService";
+import genreService, { ErrorResponseO, GenreItem, GenreItemResponse } from "../services/genreService";
 import { Genre, DataResponse, SingleGenreResponse, ErrorResponse } from "../services/genreService";
+import { MovieApiResponse } from "../services/movieService";
 
 interface CreateGenrePayload {
     name: string;
@@ -10,8 +11,10 @@ interface CreateGenrePayload {
 interface GenreState {
     response: DataResponse | null;
     loading: boolean;
-    error: ErrorResponse | null;
+    error: ErrorResponse | string | null;
     selectedGenre: Genre | null;
+    oResponse: GenreItemResponse | null;
+    oMovieResponse: MovieApiResponse | null;
 }
 
 const initialState: GenreState = {
@@ -19,7 +22,33 @@ const initialState: GenreState = {
     loading: false,
     error: null,
     selectedGenre: null,
+    oResponse: null,
+    oMovieResponse: null
 };
+
+export const getAllGenres = createAsyncThunk<GenreItemResponse>(
+    'genre/getAllGenres',
+    async () => {
+        try {
+            const response = await genreService.getAllGenres();
+            return response;
+        } catch (error) {
+            throw error || 'Failed to get all genres';
+        }
+    }   
+)
+
+export const getMovieByGenre = createAsyncThunk<MovieApiResponse, {slug: string, page: number}, { rejectValue: ErrorResponseO }>(
+    'genre/getMovieByGenre', 
+    async ({slug, page = 1}, { rejectWithValue }) => {
+        try {
+            const response = await genreService.getMovieByGenre(slug, page);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error || 'Failed to fetch genres by keyword');
+        }
+    }
+);
 
 export const fetchGenres = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
     'genre/fetchGenres',
@@ -86,10 +115,38 @@ const genreSlice = createSlice({
     reducers: {
         setSelectedGenre(state, action: { payload: Genre | null }) {
             state.selectedGenre = action.payload;
-        }
+        },
+        // setOGenres(state, action: { payload: GenreItem[] | null }) {
+        //     state.selectedOGenre = action.payload;            
+        // }
     },
     extraReducers: (builder) => {
         builder
+            // get all genres
+            .addCase(getAllGenres.pending, (state) => { 
+                state.loading = true;
+            })
+            .addCase(getAllGenres.fulfilled, (state, action) => {   
+                state.loading = false;
+                state.oResponse = action.payload;
+            }  )
+            .addCase(getAllGenres.rejected, (state, action) => {
+                state.loading = false;
+            })
+            // fetch movie by genre
+            .addCase(getMovieByGenre.pending, (state) => {
+                state.loading = true;   
+                state.error = null;
+            })  
+            .addCase(getMovieByGenre.fulfilled, (state, action) => {
+                state.loading = false;
+                state.oMovieResponse = action.payload;
+                state.error = null;
+            })
+            .addCase(getMovieByGenre.rejected, (state, action) => {
+                state.loading = false;  
+                state.error = action.payload?.msg ?? null;
+            })
             // fetch
             .addCase(fetchGenres.pending, (state) => {
                 state.loading = true;

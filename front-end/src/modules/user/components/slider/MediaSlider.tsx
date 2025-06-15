@@ -6,30 +6,30 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { Movie } from '../../../admin/services/movieService';
+import { MovieDetail, MovieItem } from '../../../admin/services/movieService';
 
 interface MediaSliderProps {
-    title: string;
-    movies: Movie[];
+    title?: string;
+    movies: MovieItem[];
     showIndex?: boolean;
     slidesPerView?: number;
     spaceBetween?: number;
     height?: number;
-    onClick?: (movieId: number) => void;
+    onClick?: (slug: string) => void;
 };
 
 
 const MediaSlider: React.FC<MediaSliderProps> = ({ title, movies, showIndex = false, slidesPerView = 7, spaceBetween = 30, height = 149.286, onClick }) => {
     return (
         <>
-            <h1 className="mb-3 font-extrabold text-[30px]">{title}</h1>
+            <h1 className="mb-3 font-extrabold text-[20px]">{title}</h1>
 
             {movies.length > 0 && (
                 <>
-                    <div className="swiper-button-prev-custom absolute top-[60%] left-0 -translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
+                    <div className="swiper-button-prev-custom absolute top-[55%] left-0 -translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
                         <LeftOutlined />
                     </div>
-                    <div className="swiper-button-next-custom absolute top-[60%] right-0 translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
+                    <div className="swiper-button-next-custom absolute top-[55%] right-0 translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600">
                         <RightOutlined />
                     </div>
                 </>
@@ -46,14 +46,14 @@ const MediaSlider: React.FC<MediaSliderProps> = ({ title, movies, showIndex = fa
                 className="mySwiper "
             >
                 {movies.map((movie, index) => (
-                    <SwiperSlide key={movie.id}>
+                    <SwiperSlide key={movie._id}>
                         <div className={`relative overflow-hidden rounded-xl h-[${height}px]`}
-                            onClick={() => onClick && onClick(movie.id)}
+                            onClick={() => onClick && onClick(movie.slug)}
                         >
                             <img
                                 className=" rounded-xl transition-transform duration-500 transform hover:scale-110 w-full h-full"
-                                src={movie.thumbnail}
-                                alt={movie.title}
+                                src={`https://img.ophim.live/uploads/movies/${movie.poster_url}`}
+                                alt={movie.name}
                             />
                             {showIndex && (
                                 <span className="absolute top-2 left-2 text-5xl font-extrabold text-black drop-shadow-[3px_3px_0_rgba(255,255,255,1)] shadow-lg">
@@ -61,7 +61,7 @@ const MediaSlider: React.FC<MediaSliderProps> = ({ title, movies, showIndex = fa
                                 </span>
                             )}
                         </div>
-                        <p className="text-center mt-2 text-sm">{movie.title}</p>
+                        <p className="text-center mt-2 text-sm ">{movie.name}</p>
                     </SwiperSlide>
                 ))}
 

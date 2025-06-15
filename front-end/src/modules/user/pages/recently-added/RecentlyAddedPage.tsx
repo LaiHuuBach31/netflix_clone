@@ -32,12 +32,12 @@ const RecentlyAddedPage: React.FC = () => {
     return (
         <>
             <SectionTop title="Recently Added" description="Movies move us like nothing else can, whether they’re scary, funny, dramatic, romantic or anywhere in-between. So many titles, so much to experience." />
-            <MediaSlider 
+            {/* <MediaSlider 
                 title="New Arrivals" 
                 movies={movies} 
                 slidesPerView={5} 
                 onClick={handleMovieDetail}
-            />
+            /> */}
         </>
     )
 }

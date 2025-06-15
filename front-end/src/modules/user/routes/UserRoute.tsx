@@ -17,7 +17,7 @@ const UserRoute = [{
             path: '/home',
             children: [
                 { index: true, element: <HomePage /> },                
-                { path: ':id', element: <DetailPage /> }, 
+                { path: ':slug', element: <DetailPage /> }, 
             ],
         },
         { path: '/profile', element: <ProfilePage /> },
@@ -25,28 +25,28 @@ const UserRoute = [{
             path: '/favourite',
             children: [
                 { index: true, element: <FavoritePage /> },
-                { path: ':id', element: <DetailPage /> },
+                { path: ':slug', element: <DetailPage /> },
             ]
         },
         {
             path: '/movies',
             children: [
                 { index: true, element: <MoviesPage /> },
-                { path: ':id', element: <DetailPage /> },
+                { path: ':slug', element: <DetailPage /> },
             ]
         },
         {
             path: '/tv-show',
             children: [
                 { index: true, element: <TVShowPage /> },
-                { path: ':id', element: <DetailPage /> },
+                { path: ':slug', element: <DetailPage /> },
             ]
         },
         {
             path: '/recently-added',
             children: [
                 { index: true, element: <RecentlyAddedPage /> },
-                { path: ':id', element: <DetailPage /> },
+                { path: ':slug', element: <DetailPage /> },
             ]
         },
     ]

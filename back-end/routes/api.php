@@ -117,8 +117,8 @@ Route::group([
         Route::delete('/{id}', [EpisodesController::class, 'destroy'])->middleware('check.permission:delete_episodes');
     });
 
+    Route::get('/banners', [BannerController::class, 'index']);
     Route::group(['prefix' => 'banners', 'middleware' => ['auth:api']], function () {
-        Route::get('/', [BannerController::class, 'index'])->middleware('check.permission:get_banners');
         Route::get('/{id}', [BannerController::class, 'show'])->middleware('check.permission:show_banner');
         Route::post('/', [BannerController::class, 'store'])->middleware('check.permission:create_banner');
         Route::put('/{id}', [BannerController::class, 'update'])->middleware('check.permission:update_banner');

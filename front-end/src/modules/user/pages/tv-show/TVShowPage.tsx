@@ -35,14 +35,14 @@ const TVShowPage: React.FC = () => {
             <SectionTop title="TV Shows" description="These days, the small screen has some very big things to offer. From sitcoms to dramas to travel and talk shows, these are all the best programs on TV." />
 
             <div className='media-slider mt-[60px] text-[white] text-white !relative mt-[20px]'>
-                <MediaSlider
+                {/* <MediaSlider
                     title="Drama Movies Based on Books"
                     movies={movies}
                     slidesPerView={5}
                     spaceBetween={10}
                     height={150}
                     onClick={handleMovieDetail}
-                />
+                /> */}
             </div>
 
             <SectionEnd />

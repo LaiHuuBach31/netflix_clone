@@ -1,21 +1,48 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import movieService, { CreatePayload, DataResponse, ErrorResponse, Movie, SingleResponse } from "../services/movieService";
+import movieService, { CreatePayload, DataResponse, ErrorResponse, Movie, MovieApiResponse, MovieDetail, MovieDetailResponse, SingleResponse } from "../services/movieService";
 
 interface MovieState {
     response: DataResponse | null;
+    oResponse: MovieApiResponse | null;
     loading: boolean;
     error: ErrorResponse | null;
     selectedMovie: Movie | null;
-    fetchingId: number | null;
+    selectedOMovie: MovieDetail | null;
+    fetchingSlug: string | null;
 }
 
 const initialState: MovieState = {
     response: null,
+    oResponse: null,
     loading: false,
     error: null,
     selectedMovie: null,
-    fetchingId: null
+    selectedOMovie: null,
+    fetchingSlug: null,
 }
+
+export const getAllMovies = createAsyncThunk<MovieApiResponse, { page?: number }, { rejectValue: ErrorResponse }>(
+    'movie/getAllMovies',
+    async ({ page = 1 }, { rejectWithValue }) => {
+        try {
+            const response = await movieService.getAllMovies(page);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error || 'Failed to get all movies');
+
+        }
+    })
+
+export const showMovieDetail = createAsyncThunk<MovieDetailResponse, string, { rejectValue: ErrorResponse }>(
+    'movie/showMovieDetail',
+    async (slug, { rejectWithValue }) => {
+        try {
+            const response = await movieService.showMovieDetail(slug);            
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error || 'Failed to show movie detail');
+        }
+    })
 
 export const fetchMovies = createAsyncThunk<DataResponse, { page?: number, keyword?: string }, { rejectValue: ErrorResponse }>(
     'movie/fetchMovies',
@@ -85,12 +112,45 @@ const movieSlice = createSlice({
         setSelectedMovie(state, action: { payload: Movie | null }) {
             state.selectedMovie = action.payload;
         },
-        setFetchingId(state, action: { payload: number | null }) {
-            state.fetchingId = action.payload;
+        setSelectedOMovie(state, action: { payload: MovieDetail | null }) {
+            state.selectedOMovie = action.payload;
         },
+        setFetchingId(state, action: { payload: string | null }) {
+            state.fetchingSlug = action.payload;
+        },
+
     },
     extraReducers: (builder) => {
         builder
+            // get all
+            .addCase(getAllMovies.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getAllMovies.fulfilled, (state, action) => {
+                state.loading = false;
+                state.oResponse = action.payload;
+                state.error = null;
+            })
+            .addCase(getAllMovies.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? null;
+            })
+            // show movie detail
+            .addCase(showMovieDetail.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+                state.selectedMovie = null;
+            })
+            .addCase(showMovieDetail.fulfilled, (state, action) => {
+                state.loading = false;
+                state.selectedOMovie = action.payload.data.item;
+            })
+            .addCase(showMovieDetail.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? null;
+                state.selectedMovie = null;
+            })
             // fetch
             .addCase(fetchMovies.pending, (state) => {
                 state.loading = true;
@@ -110,17 +170,17 @@ const movieSlice = createSlice({
                 state.loading = true;
                 state.error = null;
                 state.selectedMovie = null;
-                state.fetchingId = action.meta.arg;
+                state.fetchingSlug = action.meta.requestId;
             })
             .addCase(fetchMovieById.fulfilled, (state, action) => {
                 state.loading = false;
                 state.selectedMovie = action.payload;
-                state.fetchingId = null;
+                state.fetchingSlug = null;
             })
             .addCase(fetchMovieById.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
-                state.fetchingId = null;
+                state.fetchingSlug = null;
             })
 
             // create
@@ -176,5 +236,5 @@ const movieSlice = createSlice({
     }
 });
 
-export const { setSelectedMovie, setFetchingId } = movieSlice.actions;
+export const { setSelectedMovie, setSelectedOMovie,  setFetchingId } = movieSlice.actions;
 export default movieSlice.reducer;

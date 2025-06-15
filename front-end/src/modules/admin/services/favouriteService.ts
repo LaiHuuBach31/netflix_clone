@@ -1,18 +1,19 @@
 import api from "../../../services/api";
-import { Movie } from "./movieService";
+import { Movie, MovieDetail } from "./movieService";
 import { User } from "./userService";
 
 export interface Favourite {
     id: number;
     user_id: number;
-    movie_id: number;
+    movie_id: any;
     user: User;
-    movie: Movie
+    movie: any;
+    // movie: MovieDetail | Movie;
 }
 
 export interface CreatePayload {
     user_id: number;
-    movie_id: number;
+    movie_id: any;
 }
 
 export interface PaginationLinks {

@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Favourite;
+use Illuminate\Support\Facades\Auth;
 
 class FavouriteRepository extends BaseRepository{
 
@@ -16,9 +17,13 @@ class FavouriteRepository extends BaseRepository{
         if ($key && $search) {
             $query->where($key, 'like', '%' . $search . '%');
         }
-
-        $query->with('user', 'movie');
         
+        $user = Auth::user();
+        if ($user) {
+            // $query->where('user_id', $user->id)->with('user', 'movie');
+            $query->where('user_id', $user->id)->with('user');
+        }
+
         return $query->paginate($perPage);
     }
 
