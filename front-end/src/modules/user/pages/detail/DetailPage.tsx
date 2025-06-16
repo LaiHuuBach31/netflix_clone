@@ -1,7 +1,7 @@
 import { Button, Rate, Tag } from 'antd'
 import React, { useEffect, useState } from 'react'
 import SectionHeader from '../../components/section/SectionHeader'
-import { useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import { fetchMovieById, setSelectedMovie, setSelectedOMovie, showMovieDetail } from '../../../admin/store/movieSlice';
@@ -11,6 +11,7 @@ import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
 
 const DetailPage: React.FC = () => {
 
+    const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
     const dispatch = useDispatch<AppDispatch>();
     const { selectedOMovie: movie, loading: moviesLoading, fetchingSlug } = useSelector((state: RootState) => state.movie);
@@ -18,8 +19,8 @@ const DetailPage: React.FC = () => {
 
 
     useEffect(() => {
-        if (slug) {            
-            dispatch(showMovieDetail(slug));    
+        if (slug) {
+            dispatch(showMovieDetail(slug));
         }
 
         return () => {
@@ -39,35 +40,38 @@ const DetailPage: React.FC = () => {
     }
 
     const isFavourite = userId && slug && favouriteResponse?.data
-            ? favouriteResponse.data.some((fav) => fav.user_id == userId && fav.movie_id == movie?._id)
-            : false;
+        ? favouriteResponse.data.some((fav) => fav.user_id == userId && fav.movie_id == movie?._id)
+        : false;
 
-            console.log('isFavourite', isFavourite);
-            
-                
+
     const handleAddMovieFavourite = () => {
         if (userId && movie?.slug) {
             dispatch(createFavourite({ user_id: userId, movie_id: movie?.slug })).unwrap()
                 .then((result) => {
                     showSuccessToast(result.message);
                 })
-                .catch((error:any) => {
+                .catch((error: any) => {
                     const errorDetails = error.errors ? Object.values(error.errors).flat() : [];
-                          const detailedError = errorDetails.length
-                            ? errorDetails[0]
-                            : error.message || "Login failed";
-                          showErrorToast(detailedError);
+                    const detailedError = errorDetails.length
+                        ? errorDetails[0]
+                        : error.message || "Login failed";
+                    showErrorToast(detailedError);
                 });
         } else {
             showErrorToast('Faild');
         }
     }
 
+    const handleWatchNow = () => {
+       navigate(`/watch-movie/${slug}`);
+    }
+    
+
     return (
         <>
             <div style={{ flex: 1, padding: '0 100px' }}>
 
-                <SectionHeader title="Detail" />
+                {/* <SectionHeader title="Detail" /> */}
 
                 <div className="text-white py-8 px-6">
                     <div className="flex flex-col md:flex-row gap-6">
@@ -75,9 +79,9 @@ const DetailPage: React.FC = () => {
                         <div className="w-full md:w-[200px] flex-shrink-0">
                             <div className="relative">
                                 <div>
-                                    <img 
+                                    <img
                                         src={`https://img.ophim.live/uploads/movies/${movie?.thumb_url}`} alt=""
-                                     />
+                                    />
                                 </div>
                                 <div className="absolute bottom-1 left-1 text-xs bg-black/50 text-white px-1 rounded">
                                     {movie?.lang}
@@ -103,7 +107,7 @@ const DetailPage: React.FC = () => {
                                 <span><strong>Type:</strong> {movie?.type}</span>
                                 <span><strong>Produced:</strong> {movie?.year}</span>
                                 <span>
-                                    <strong>Country: </strong> 
+                                    <strong>Country: </strong>
                                     {movie?.country.map((coun, index) => (
                                         <Tag key={index} >
                                             {coun.name}
@@ -114,7 +118,7 @@ const DetailPage: React.FC = () => {
                                 <span><strong>Date update:</strong> {movie?.modified.time} </span>
                                 <span><strong>Episode:</strong> {movie?.episode_current}</span>
                                 <span>
-                                    <strong>Genre: </strong> 
+                                    <strong>Genre: </strong>
                                     {movie?.category.map((cat, index) => (
                                         <Tag key={index} >
                                             {cat.name}
@@ -133,7 +137,9 @@ const DetailPage: React.FC = () => {
 
                             <div className="flex gap-2 pt-2">
                                 <Button className="bg-red-600 text-white font-bold hover:bg-red-700">WATCH TRAILER</Button>
-                                <Button className="bg-red-600 text-white font-bold hover:bg-red-700">WATCH NOW</Button>
+                                {/* <Link to="/watch-movie"> */}
+                                <Button className="bg-red-600 text-white font-bold hover:bg-red-700" onClick={handleWatchNow}>WATCH NOW</Button>
+                                {/* </Link> */}
                                 <Button
                                     className={`font-bold ${isFavourite ? 'bg-red-500 text-white-500cd' : 'bg-white text-red-500'}`}
                                     onClick={handleAddMovieFavourite}
@@ -148,7 +154,6 @@ const DetailPage: React.FC = () => {
                     <div className="mt-12 border-t border-[#3b3b5b] pt-6">
                         <h3 className="text-white font-bold uppercase text-sm">COMMENT</h3>
                         <p className="text-sm text-gray-400 mt-2">NO COMMENT</p>
-                        <Button className="mt-2 bg-red-600 text-white font-bold">LOGIN</Button>
                     </div>
 
                     <div className="mt-12 border-t border-[#3b3b5b] pt-6">
@@ -156,6 +161,7 @@ const DetailPage: React.FC = () => {
                         <p className="text-sm text-gray-400 mt-2">
                             No suitable movies yet
                         </p>
+                        <Button className="mt-2 bg-red-600 text-white font-bold">LOGIN</Button>
                     </div>
                 </div>
             </div>

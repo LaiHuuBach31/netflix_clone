@@ -14,6 +14,7 @@ import { MovieItem } from '../../../admin/services/movieService';
 
 
 const MoviesPage: React.FC = () => {
+    
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const { response: genresResponse, oResponse: oGenresResponse, oMovieResponse: oMovieByGenerResponse, loading: genresLoading } = useSelector((state: RootState) => state.genre);

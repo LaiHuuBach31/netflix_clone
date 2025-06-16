@@ -1,6 +1,7 @@
 import UserLayout from "../../../layout/UserLayout";
 import ProtectedRoute from "../../../routes/ProtectedRoute";
 import DetailPage from "../pages/detail/DetailPage";
+import WatchMoviePage from "../pages/detail/WatchMoviePage";
 import FavoritePage from "../pages/favourite/FavouritePage";
 import HomePage from "../pages/home/HomePage";
 import MoviesPage from "../pages/movies/MoviesPage";
@@ -49,6 +50,7 @@ const UserRoute = [{
                 { path: ':slug', element: <DetailPage /> },
             ]
         },
+        { path: '/watch-movie/:slug', element: <WatchMoviePage /> },
     ]
 }]
 
