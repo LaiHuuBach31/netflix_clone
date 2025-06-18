@@ -1,89 +1,80 @@
-import React, { use, useEffect } from 'react'
-import SectionHeader from '../../components/section/SectionHeader'
-import SectionTop from '../../components/section/SectionTop'
-import MediaSlider from '../../components/slider/MediaSlider'
-import { Button } from 'antd';
+import React, { useEffect } from 'react';
+import SectionHeader from '../../components/section/SectionHeader';
+import SectionTop from '../../components/section/SectionTop';
+import MediaSlider from '../../components/slider/MediaSlider';
 import SectionEnd from '../../components/section/SectionEnd';
+import { Button } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
-import { fetchMovies, getAllMovies } from '../../../admin/store/movieSlice';
-import { fetchGenres, getAllGenres, getMovieByGenre } from '../../../admin/store/genreSlice';
-import { Genre, GenreItem } from '../../../admin/services/genreService';
+import { getAllGenres, getMovieByGenre } from '../../../admin/store/genreSlice';
+import { GenreItem } from '../../../admin/services/genreService';
 import { useNavigate } from 'react-router-dom';
 import { MovieItem } from '../../../admin/services/movieService';
-
+import { showInfoToast } from '../../../../utils/toast';
 
 const MoviesPage: React.FC = () => {
-    
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
-    const { response: genresResponse, oResponse: oGenresResponse, oMovieResponse: oMovieByGenerResponse, loading: genresLoading } = useSelector((state: RootState) => state.genre);
-    const { response: moviesResponse, oResponse: oMoviesResponse, loading: moviesLoading } = useSelector((state: RootState) => state.movie);
+    const { oResponse, oMovieResponse: oMovieByGenerResponse, loading: genresLoading } = useSelector(
+        (state: RootState) => state.genre
+    );
+    const { loading: moviesLoading } = useSelector((state: RootState) => state.movie);
 
-    // useEffect(() => {
-    //     dispatch(fetchMovies({ page: 1, keyword: '' }));
-    //     dispatch(fetchGenres({ page: 1, keyword: '' }));
-    // }, [dispatch]);
+    console.log(oResponse);
 
-    // const genres = (genresResponse?.data || []) as Genre[];
-    // const movies = (moviesResponse?.data || []) as Movie[];
-
-    // const handleMovieDetail = (movieId: number) => {
-    //     navigate(`/movies/${movieId}`);
-    // }
+    const genres = (oResponse?.data?.items || []) as GenreItem[];
+    const moviesByGenre = oMovieByGenerResponse || {};
 
     useEffect(() => {
         dispatch(getAllGenres());
-    }, [dispatch]);
+        console.log('Fetching all genres...');
 
-    const genres = (oGenresResponse?.data.items || []) as GenreItem[];
-    const movies = (oMovieByGenerResponse?.data?.items || []) as MovieItem[];
-    console.log(movies);
-    
+    }, [dispatch]);
 
     useEffect(() => {
-        genres.forEach((genre) => {
-            dispatch(getMovieByGenre({ slug: genre.slug, page: 1 }));
-        });
-    }, [dispatch]);
+        if (genres.length > 0) {
+            genres.forEach((genre) => {
+                dispatch(getMovieByGenre({ slug: genre.slug, page: 1 }));
+            });
+        }
+    }, [dispatch, genres.length]);
 
     const handleMovieDetail = (slug: string) => {
         navigate(`/movies/${slug}`);
-    }
+    };
+
+    // if (genresLoading || moviesLoading) {
+    //     showInfoToast('Loading movies, please wait...');
+    //     return <div className="text-white text-center py-10">Loading...</div>;
+    // }
 
     return (
-        <>
-            <SectionTop title="Movies" description="Movies move us like nothing else can, whether they’re scary, funny, dramatic, romantic or anywhere in-between. So many titles, so much to experience." />
+        <div
 
-            {/* {
-                genres.map((genre) => (
-                    <div className='media-slider mt-[60px] text-[white] text-white !relative mt-[20px]'>
-                        <MediaSlider 
-                            title={genre.name} 
-                            movies={movies.filter((movie) => movie.genre_id == genre.id)} 
-                            slidesPerView={5} 
-                            spaceBetween={10} 
-                            height={150} 
-                            onClick={handleMovieDetail}
-                        />
-                    </div>
-                ))
-            } */}
+        >
+            <SectionTop
+                title="Movies"
+                description="Movies move us like nothing else can, whether they’re scary, funny, dramatic, romantic or anywhere in-between. So many titles, so much to experience."
+            />
 
-            {genres.map((genre) => {
-                const genreMovies = movies.filter((movie) =>
+            {genres.map((genre) => {   
+                if(genre.slug === 'phim-18') {
+                    return null;  
+                }             
+                const genreMovies = moviesByGenre[genre.slug]?.data.items || [];
+                const filteredMovies = genreMovies.filter((movie) =>
                     movie.category.some((cat) => cat.slug === genre.slug)
                 );
-                
+
                 return (
                     <div
-                        key={genre.id}
+                        key={genre.slug}
                         className="media-slider mt-[60px] text-[white] !relative mt-[20px]"
                     >
-                        <SectionHeader title={genre.name} />
                         <MediaSlider
+                            id={`slider-${genre.slug}`}
                             title={genre.name}
-                            movies={genreMovies}
+                            movies={filteredMovies}
                             slidesPerView={5}
                             spaceBetween={10}
                             height={150}
@@ -93,8 +84,8 @@ const MoviesPage: React.FC = () => {
                 );
             })}
             <SectionEnd />
-        </>
-    )
-}
+        </div>
+    );
+};
 
-export default MoviesPage
+export default MoviesPage;

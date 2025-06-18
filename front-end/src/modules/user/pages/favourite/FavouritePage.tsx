@@ -93,7 +93,7 @@ function FavouritePage() {
 
             <div key={movieFavorite.id} className="relative text-white">
               <img
-                src={`https://img.ophim.live/uploads/movies/${movieFavorite?.movieData.data.item.thumb_url}`}
+                src={`https://img.ophim.live/uploads/movies/${movieFavorite?.movieData?.data?.item?.thumb_url}`}
                 alt={movieFavorite?.movieData?.data?.item.name}
                 className="w-full h-[220px] object-cover rounded-md"
               />

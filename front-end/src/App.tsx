@@ -4,10 +4,11 @@ import { RootState, AppDispatch } from './store';
 import { checkAuth, refreshAccessToken } from './store/slices/authSlice';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import AppRoute from './routes';
+import { showInfoToast } from './utils/toast';
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-    const { loading, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { loading, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -20,10 +21,10 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-        const accessToken = localStorage.getItem('access_token');
-        if (accessToken && !isAuthenticated && !loading) {
-    dispatch(checkAuth());
-        }
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken && !isAuthenticated && !loading) {
+      dispatch(checkAuth());
+    }
 
     const interval = setInterval(() => {
       const accessToken = localStorage.getItem('access_token');
@@ -33,7 +34,7 @@ const App: React.FC = () => {
     }, 60000);
 
     return () => clearInterval(interval);
-    }, [dispatch, isAuthenticated, loading]);
+  }, [dispatch, isAuthenticated, loading]);
 
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
@@ -41,6 +42,8 @@ const App: React.FC = () => {
       const decoded = jwtDecode<JwtPayload>(accessToken);
       const expireAt = decoded.exp! * 1000;
       const timeToRefresh = expireAt - Date.now() - 5 * 60 * 1000;
+      console.log('timeToRefresh', timeToRefresh);
+
       if (timeToRefresh > 0) {
         const timeoutId = setTimeout(() => {
           dispatch(refreshAccessToken());
@@ -50,9 +53,10 @@ const App: React.FC = () => {
     }
   }, [dispatch]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // if (loading) {
+  //   showInfoToast('Loading, please wait...');
+  //   return null;
+  // }
 
   return (
     <div className="App">

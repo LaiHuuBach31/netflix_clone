@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import genreService, { ErrorResponseO, GenreItem, GenreItemResponse } from "../services/genreService";
 import { Genre, DataResponse, SingleGenreResponse, ErrorResponse } from "../services/genreService";
 import { MovieApiResponse } from "../services/movieService";
+import { ac } from "react-router/dist/development/route-data-5OzAzQtT";
 
 interface CreateGenrePayload {
     name: string;
@@ -14,7 +15,7 @@ interface GenreState {
     error: ErrorResponse | string | null;
     selectedGenre: Genre | null;
     oResponse: GenreItemResponse | null;
-    oMovieResponse: MovieApiResponse | null;
+    oMovieResponse: { [slug: string]: MovieApiResponse } | null;
 }
 
 const initialState: GenreState = {
@@ -35,12 +36,12 @@ export const getAllGenres = createAsyncThunk<GenreItemResponse>(
         } catch (error) {
             throw error || 'Failed to get all genres';
         }
-    }   
+    }
 )
 
-export const getMovieByGenre = createAsyncThunk<MovieApiResponse, {slug: string, page: number}, { rejectValue: ErrorResponseO }>(
-    'genre/getMovieByGenre', 
-    async ({slug, page = 1}, { rejectWithValue }) => {
+export const getMovieByGenre = createAsyncThunk<MovieApiResponse, { slug: string, page: number }, { rejectValue: ErrorResponseO }>(
+    'genre/getMovieByGenre',
+    async ({ slug, page = 1 }, { rejectWithValue }) => {
         try {
             const response = await genreService.getMovieByGenre(slug, page);
             return response;
@@ -123,28 +124,31 @@ const genreSlice = createSlice({
     extraReducers: (builder) => {
         builder
             // get all genres
-            .addCase(getAllGenres.pending, (state) => { 
+            .addCase(getAllGenres.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getAllGenres.fulfilled, (state, action) => {   
+            .addCase(getAllGenres.fulfilled, (state, action) => {
                 state.loading = false;
                 state.oResponse = action.payload;
-            }  )
+            })
             .addCase(getAllGenres.rejected, (state, action) => {
                 state.loading = false;
             })
             // fetch movie by genre
             .addCase(getMovieByGenre.pending, (state) => {
-                state.loading = true;   
+                state.loading = true;
                 state.error = null;
-            })  
+            })
             .addCase(getMovieByGenre.fulfilled, (state, action) => {
                 state.loading = false;
-                state.oMovieResponse = action.payload;
+                state.oMovieResponse = {
+                    ...state.oMovieResponse,
+                    [action.meta.arg.slug]: action.payload,
+                };
                 state.error = null;
             })
             .addCase(getMovieByGenre.rejected, (state, action) => {
-                state.loading = false;  
+                state.loading = false;
                 state.error = action.payload?.msg ?? null;
             })
             // fetch

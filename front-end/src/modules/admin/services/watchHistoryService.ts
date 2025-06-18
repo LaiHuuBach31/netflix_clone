@@ -5,16 +5,16 @@ import { User } from "./userService";
 export interface WatchHistory {
     id: number;
     user_id: number;
-    movie_id: number;
+    movie_id: any;
     watched_at: string;
     progress: number;
     user: User;
-    movie: Movie
+    movie: any
 }
 
 export interface CreatePayload {
     user_id: number;
-    movie_id: number;
+    movie_id: any;
     watched_at: string;
     progress: number;
 }

@@ -99,9 +99,11 @@ const DetailPage: React.FC = () => {
                                 </p>
                             </div>
 
-                            <p className="text-sm text-gray-300">
-                                {movie?.content}
-                            </p>
+                            {
+                                movie?.content && (
+                                    <p className="text-sm text-gray-300" dangerouslySetInnerHTML={{ __html: movie.content }} />
+                                )
+                            }
 
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-1 text-sm">
                                 <span><strong>Type:</strong> {movie?.type}</span>

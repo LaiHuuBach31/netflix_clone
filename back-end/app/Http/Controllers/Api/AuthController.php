@@ -173,7 +173,7 @@ class AuthController extends Controller
             $tokenRecord = RefreshToken::where('token', $refreshToken)
                 ->where('expires_at', '>', now())
                 ->first();
-
+           
             if (!$tokenRecord) {
                 return $this->unauthorizedResponse([], 'Invalid or expired refresh token');
             }

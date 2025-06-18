@@ -121,12 +121,13 @@ const authService = {
     // refresh token
     refreshToken: async (): Promise<AuthResponse> => {
         const refreshToken = localStorage.getItem('refresh_token');
-       
+        
         if (!refreshToken) {
             throw new Error('No refresh token available');
         }
 
-        try {            
+        try {       
+            console.log('Attempting to refresh token...');     
             const response = await api.post<AuthResponse>('/refresh', {}, {
                 headers: { Authorization: `Bearer ${refreshToken}` },
             });

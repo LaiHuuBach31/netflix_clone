@@ -6,98 +6,137 @@ import { useParams } from 'react-router';
 import { showMovieDetail } from '../../../admin/store/movieSlice';
 import { Button } from 'antd';
 import Hls from 'hls.js';
+import { createWatchHistory } from '../../../admin/store/watchHistorySlice';
+import { showErrorToast } from '../../../../utils/toast';
 
 const WatchMoviePage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const dispatch = useDispatch<AppDispatch>();
-  const { selectedOMovie: movie, loading: moviesLoading } = useSelector((state: RootState) => state.movie);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null);
-  const [activeEpisode, setActiveEpisode] = useState<string | null>(null); // Theo dõi tập đang active
+    const { slug } = useParams<{ slug: string }>();
+    const dispatch = useDispatch<AppDispatch>();
+    const { selectedOMovie: movie, loading: moviesLoading } = useSelector((state: RootState) => state.movie);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null);
+    const [activeEpisode, setActiveEpisode] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (slug) {
-      dispatch(showMovieDetail(slug));
+    let userId: number | null = null;
+    const user = localStorage.getItem('user');
+    if (user) {
+        try {
+            const parsedUser = JSON.parse(user);
+            userId = parsedUser.id;
+        } catch (error) {
+            console.error('Error parsing user from localStorage:', error);
+        }
     }
-  }, [dispatch, slug]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video && selectedEpisode) {
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(selectedEpisode);
-        hls.attachMedia(video);
-        video.play().catch((error) => console.error('Auto play failed:', error));
-        return () => {
-          hls.destroy();
-        };
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = selectedEpisode;
-        video.play().catch((error) => console.error('Auto play failed:', error));
-      }
+    useEffect(() => {
+        if (slug) {
+            dispatch(showMovieDetail(slug));
+        }
+    }, [dispatch, slug]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (video && selectedEpisode) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(selectedEpisode);
+                hls.attachMedia(video);
+                video.play().catch((error) => console.error('Auto play failed:', error));
+
+                // const handleTimeUpdate = () => {
+                //     if (userId && movie) {
+                //         const progress = video.currentTime / video.duration || 0;
+                //         dispatch(
+                //             createWatchHistory({
+                //                 user_id: userId,
+                //                 movie_id: movie.slug,
+                //                 watched_at: new Date().toISOString(),
+                //                 progress: progress,
+                //             })
+                //         )
+                //             .unwrap()
+                //             .then(() => {
+                //                 console.log('Watch history saved');
+                //             })
+                //             .catch((error) => {
+                //                 console.error('Failed to save watch history:', error);
+                //                 showErrorToast('Failed to save watch history');
+                //             });
+                //     }
+                // };
+
+                // video.addEventListener('timeupdate', handleTimeUpdate);
+
+                return () => {
+                    hls.destroy();
+                    // video.removeEventListener('timeupdate', handleTimeUpdate);
+                };
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = selectedEpisode;
+                video.play().catch((error) => console.error('Auto play failed:', error));
+            }
+        }
+    }, [selectedEpisode, userId, movie, dispatch]);
+
+    const handleEpisodeClick = (link_m3u8: string, episodeName: string) => {
+        setSelectedEpisode(link_m3u8);
+        setActiveEpisode(episodeName);
+    };
+
+    if (moviesLoading || !movie) {
+        return <div className="text-white text-center py-6">Loading...</div>;
     }
-  }, [selectedEpisode]);
 
-  const handleEpisodeClick = (link_m3u8: string, episodeName: string) => {
-    setSelectedEpisode(link_m3u8);
-    setActiveEpisode(episodeName); 
-  };
+    return (
+        <div className="watch-movie-page">
+            <h1 className="text-2xl font-bold text-white mb-4">Watch Movie: {movie?.name}</h1>
 
-  if (moviesLoading || !movie) {
-    return <div className="text-white text-center py-6">Loading...</div>;
-  }
+            <video
+                ref={videoRef}
+                controls
+                autoPlay={!!selectedEpisode}
+                width="100%"
+                height="auto"
+                poster={movie?.poster_url ? `https://img.ophim.live/uploads/movies/${movie.poster_url}` : undefined}
+            />
 
-  return (
-    <div className="watch-movie-page">
-      <h1 className="text-2xl font-bold text-white mb-4">Watch Movie: {movie?.name}</h1>
+            <div className="movie-info">
+                <div className="episode-info flex items-center flex-wrap gap-2 mt-5">
+                    {movie?.episodes && movie.episodes.length > 0 ? (
+                        movie.episodes.map((server, serverIndex) =>
+                            server.server_data.map((episode, episodeIndex) => {
+                                const episodeName = episode.name === 'Full' ? 'Full' : `Episode ${episodeIndex + 1}`;
+                                return (
+                                    <div key={`${serverIndex}-${episodeIndex}`} className="episode-item">
+                                        <Button
+                                            className={`watch-episode-button ${activeEpisode === episodeName ? 'active' : ''}`}
+                                            onClick={() => handleEpisodeClick(episode.link_m3u8, episodeName)}
+                                        >
+                                            <span className="episode-title">
+                                                {episode.name === 'Full' ? (
+                                                    <span className="full-episode">Full</span>
+                                                ) : (
+                                                    `Episode ${episodeIndex + 1}`
+                                                )}
+                                            </span>
+                                        </Button>
+                                    </div>
+                                );
+                            })
+                        )
+                    ) : (
+                        <button className="episode-button">Full</button>
+                    )}
+                </div>
+            </div>
 
-      <video
-        ref={videoRef}
-        controls
-        autoPlay={!!selectedEpisode} 
-        width="100%"
-        height="auto"
-        poster={movie?.poster_url ? `https://img.ophim.live/uploads/movies/${movie.poster_url}` : undefined} 
-      />
+            <div className="mt-12 border-t border-[#3b3b5b] pt-6">
+                <h3 className="text-white font-bold uppercase text-sm">COMMENT</h3>
+                <p className="text-sm text-gray-400 mt-2">NO COMMENT</p>
+            </div>
 
-      <div className="movie-info">
-        <div className="episode-info flex items-center flex-wrap gap-2 mt-5">
-          {movie?.episodes && movie.episodes.length > 0 ? (
-            movie.episodes.map((server, serverIndex) =>
-              server.server_data.map((episode, episodeIndex) => {
-                const episodeName = episode.name === 'Full' ? 'Full' : `Episode ${episodeIndex + 1}`;
-                return (
-                  <div key={`${serverIndex}-${episodeIndex}`} className="episode-item">
-                    <Button
-                      className={`watch-episode-button ${activeEpisode === episodeName ? 'active' : ''}`}
-                      onClick={() => handleEpisodeClick(episode.link_m3u8, episodeName)}
-                    >
-                      <span className="episode-title">
-                        {episode.name === 'Full' ? (
-                          <span className="full-episode">Full</span>
-                        ) : (
-                          `Episode ${episodeIndex + 1}`
-                        )}
-                      </span>
-                    </Button>
-                  </div>
-                );
-              })
-            )
-          ) : (
-            <button className="episode-button">Full</button>
-          )}
         </div>
-      </div>
-
-      <div className="mt-12 border-t border-[#3b3b5b] pt-6">
-        <h3 className="text-white font-bold uppercase text-sm">COMMENT</h3>
-        <p className="text-sm text-gray-400 mt-2">NO COMMENT</p>
-      </div>
-      
-    </div>
-  );
+    );
 };
 
 export default WatchMoviePage;
