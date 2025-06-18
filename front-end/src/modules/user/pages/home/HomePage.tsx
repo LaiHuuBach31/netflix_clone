@@ -39,8 +39,8 @@ const HomePage: React.FC = () => {
       ?.sort((a, b) => b.tmdb.vote_average - a.tmdb.vote_average)
   ) || []) as MovieItem[];
 
-  const handleMovieDetail = (movieId: number) => {
-    navigate(`/home/${movieId}`);
+  const handleMovieDetail = (slug: string) => {
+    navigate(`/home/${slug}`);
   }
 
   return (
@@ -57,7 +57,7 @@ const HomePage: React.FC = () => {
           movies={movies}
           showIndex={true}
           height={250}
-        // onClick={handleMovieDetail}
+          onClick={handleMovieDetail}
         />
       </div>
 
