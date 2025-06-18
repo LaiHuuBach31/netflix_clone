@@ -9,7 +9,7 @@ import 'swiper/css/pagination';
 import { MovieDetail, MovieItem } from '../../../admin/services/movieService';
 
 interface MediaSliderProps {
-    id: string;
+    id?: string;
     title?: string;
     movies: MovieItem[];
     showIndex?: boolean;
@@ -39,14 +39,14 @@ const MediaSlider: React.FC<MediaSliderProps> = ({ id, title, movies, showIndex 
             {movies.length > 0 && (
                 <>
                     <div
-                        className="swiper-button-prev-custom absolute top-[55%] left-0 -translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600"
+                        className="swiper-button-prev-custom absolute top-[50%] left-0 -translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600"
                         onClick={handlePrev}
                         id={`prev-${id}`}
                     >
                         <LeftOutlined />
                     </div>
                     <div
-                        className="swiper-button-next-custom absolute top-[55%] right-0 translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600"
+                        className="swiper-button-next-custom absolute top-[50%] right-0 translate-x-full -translate-y-1/2 z-10 text-3xl cursor-pointer text-gray-600"
                         onClick={handleNext}
                         id={`next-${id}`}
                     >

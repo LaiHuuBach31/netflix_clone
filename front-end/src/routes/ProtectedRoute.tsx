@@ -9,24 +9,28 @@ const ProtectedRoute: React.FC = () => {
 
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user, loading } = useSelector((state: RootState) => state.auth);
-  const access_token = localStorage.getItem('access_token');
-  const refresh_token = localStorage.getItem('refresh_token');
   const location = useLocation();
 
-  useEffect(() => {
-    if (!isAuthenticated && !user && !loading) {
-      dispatch(checkAuth());
-    }
-  }, [dispatch, isAuthenticated, user]);
+  const access_token = localStorage.getItem('access_token');
+  const refresh_token = localStorage.getItem('refresh_token');
+  const user_localStorage = localStorage.getItem('user');
 
+  // useEffect(() => {
+  //   if (!isAuthenticated && !user && !loading) {
+  //     dispatch(checkAuth());
+  //   }
+  // }, [dispatch, isAuthenticated, user]);
+
+  // const hasAdminRole = user?.roles?.includes('Admin') || false;
 
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  const hasAdminRole = user?.roles?.includes('Admin') || false;
+  const userCurent = JSON.parse(user_localStorage || '{}');
+  const hasAdminRole = userCurent?.roles?.includes('Admin') || false;
 
   if (isAdminRoute && !hasAdminRole) {
     showWarningToast("You do not have access!!!");
-    return <Navigate to="/403" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/403" state={{ from: location.pathname }} />;
   }
 
   if (!access_token && !refresh_token) {
