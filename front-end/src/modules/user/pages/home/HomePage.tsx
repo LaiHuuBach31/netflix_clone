@@ -14,26 +14,30 @@ import QnA from '../../components/q&a/QnA';
 import MediaSlider from '../../components/slider/MediaSlider';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
-import { fetchMovies } from '../../../admin/store/movieSlice';
-import { Movie } from '../../../admin/services/movieService';
+import { fetchMovies, getAllMovies } from '../../../admin/store/movieSlice';
+import { Movie, MovieItem } from '../../../admin/services/movieService';
 import { useNavigate } from 'react-router';
 
 const HomePage: React.FC = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { response: moviesResponse, loading: moviesLoading } = useSelector((state: RootState) => state.movie);
+  const { oResponse: moviesResponse, loading: moviesLoading } = useSelector((state: RootState) => state.movie);
 
   useEffect(() => {
     let user = localStorage.getItem('user');
     let access_token = localStorage.getItem('access_token');
     let refresh_token = localStorage.getItem('refresh_token');
-    if(user && access_token && refresh_token) {
-      dispatch(fetchMovies({ }));
+    if (user && access_token && refresh_token) {
+      dispatch(getAllMovies({}));
     }
   }, [dispatch]);
 
-  const movies = (moviesResponse?.data?.filter((movie) => movie.is_featured == true) || []) as Movie[];
+  const movies = ((
+    moviesResponse?.data?.items
+      ?.filter((movie) => movie?.tmdb?.vote_average != null)
+      ?.sort((a, b) => b.tmdb.vote_average - a.tmdb.vote_average)
+  ) || []) as MovieItem[];
 
   const handleMovieDetail = (movieId: number) => {
     navigate(`/home/${movieId}`);
@@ -48,12 +52,13 @@ const HomePage: React.FC = () => {
         className="media-slider mt-[60px] text-white relative"
         style={{ flex: 1, padding: '0 100px' }}
       >
-        {/* <MediaSlider 
-            title="Trending Now" 
-            movies={movies} 
-            showIndex={true}
-            onClick={handleMovieDetail}
-          /> */}
+        <MediaSlider
+          title="Trending Now"
+          movies={movies}
+          showIndex={true}
+          height={250}
+        // onClick={handleMovieDetail}
+        />
       </div>
 
       <div className="reason-join my-[50px] text-red-100 relative" style={{ flex: 1, padding: '0 100px' }}>

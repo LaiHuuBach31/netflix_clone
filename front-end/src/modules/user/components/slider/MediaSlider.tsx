@@ -67,12 +67,13 @@ const MediaSlider: React.FC<MediaSliderProps> = ({ id, title, movies, showIndex 
             >
                 {movies.map((movie, index) => (
                     <SwiperSlide key={movie._id}>
-                        <div className={`relative overflow-hidden rounded-xl h-[${height}px]`}
+                        <div className={`relative overflow-hidden rounded-xl`}
+                            style={{ height: `${height}px` }}
                             onClick={() => onClick && onClick(movie.slug)}
                         >
                             <img
                                 className="rounded-xl transition-transform duration-500 transform hover:scale-110 w-full h-full object-cover"
-                                style={{ maxHeight: `${Number(height)}px` }}
+                                // style={{ maxHeight: `${Number(height)}px` }}
                                 src={`https://img.ophim.live/uploads/movies/${movie.poster_url}`}
                                 alt={movie.name}
                             />
