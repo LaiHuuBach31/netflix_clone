@@ -57,7 +57,9 @@ const UserRoute = [{
         {
             path: '/watch-movie/:slug',
             element: <ProtectedRoute />,
-            children: [{ path: ':slug', element: <WatchMoviePage /> }],
+            children: [
+                { index: true, element: <WatchMoviePage /> },   
+            ]
         },
     ]
 }]

@@ -10,7 +10,7 @@ import { createFavourite, deleteFavourite, fetchFavourites } from '../../../admi
 import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
 
 const DetailPage: React.FC = () => {
-
+    
     const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
     const dispatch = useDispatch<AppDispatch>();
