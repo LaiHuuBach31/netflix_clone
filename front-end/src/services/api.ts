@@ -3,8 +3,8 @@ import API_CONFIG from "../config/api";
 import authService from "../modules/auth/services/authService";
 
 const EXCLUDED_TOKEN_URLS = [
-    '/auth/login',         
-    '/auth/refresh',     
+    '/login',         
+    '/refresh',     
     '/plans',      
 ];
 

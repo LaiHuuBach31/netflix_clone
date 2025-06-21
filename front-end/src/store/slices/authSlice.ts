@@ -59,6 +59,7 @@ const isTokenExpired = (token: string): boolean => {
         const currentTime = Date.now() / 1000;
         return decoded.exp === undefined || decoded.exp < currentTime;
     } catch (error) {
+        console.error('Error decoding token:', error);
         return true;
     }
 };
@@ -78,14 +79,14 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
         if (isExpired) {
             const response = await authService.refreshToken();
             const responseData = response.data;
+            console.log('response refresh', responseData);
+            
             localStorage.setItem('access_token', responseData.access_token);
             localStorage.setItem('refresh_token', responseData.refresh_token);
 
             const userId = responseData.user?.id;
             const subscriptionResponse = await subscriptionService.getSubscriptionByUser(Number(userId));
             const subscription = subscriptionResponse.data;
-            console.log('subscription', subscription);
-            console.log('subscription end date:', subscription.end_date);
 
             if (!subscription || !subscription.end_date) {
                 throw new Error('No active subscription found');
@@ -107,9 +108,7 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
             const userId = responseData.id;
             const subscriptionResponse = await subscriptionService.getSubscriptionByUser(userId);
             const subscription = subscriptionResponse.data;
-            console.log('subscription-else', subscription);
-            console.log('subscription end date:', subscription.end_date);
-
+        
             if (!subscription || !subscription.end_date) {
                 throw new Error('No active subscription found');
             }

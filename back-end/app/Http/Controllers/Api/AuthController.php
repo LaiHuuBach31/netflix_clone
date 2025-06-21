@@ -165,7 +165,7 @@ class AuthController extends Controller
     {
         try {
             $refreshToken = str_replace('Bearer ', '', (string) $request->header('Authorization', ''));
-
+            
             if (!$refreshToken) {
                 return $this->unauthorizedResponse([], 'Refresh token is missing');
             }
@@ -173,7 +173,7 @@ class AuthController extends Controller
             $tokenRecord = RefreshToken::where('token', $refreshToken)
                 ->where('expires_at', '>', now())
                 ->first();
-           
+
             if (!$tokenRecord) {
                 return $this->unauthorizedResponse([], 'Invalid or expired refresh token');
             }
@@ -290,10 +290,11 @@ class AuthController extends Controller
         }
     }
 
-    public function changePassword(Request $request) {
+    public function changePassword(Request $request)
+    {
         try {
             $user = Auth::user();
-            if(!$user){
+            if (!$user) {
                 return $this->unauthorizedResponse([], 'User not authenticated');
             }
 
@@ -311,17 +312,17 @@ class AuthController extends Controller
                 return $this->unauthorizedResponse([], 'Current password is incorrect.');
             }
 
-             $data = array_merge(
+            $data = array_merge(
                 ['id' => $user->id],
                 [
-                    "name" => $user->name,  
+                    "name" => $user->name,
                     "avatar" => $user->avatar,
                     "email" => $user->email,
                     "status" => true,
                     'password' => bcrypt($request->new_password),
                 ]
             );
-           
+
             $updatedUser = $this->userService->updateUser($user->id, $data);
             $user = User::find($updatedUser->id);
             $roles = $user->roles->pluck('name');
@@ -353,7 +354,6 @@ class AuthController extends Controller
                 'expires_in' => config('jwt.ttl') * 60,
                 'user' => $userDto,
             ], 'Password changed successfully');
-
         } catch (ValidationException $e) {
             DB::rollBack();
             return $this->unprocessableResponse($e->errors(), 'Validation failed');
@@ -362,5 +362,4 @@ class AuthController extends Controller
             return $this->errorResponse([], 'Internal Server Error: ' . $e->getMessage());
         }
     }
-
 }

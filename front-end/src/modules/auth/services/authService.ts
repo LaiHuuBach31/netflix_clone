@@ -101,7 +101,6 @@ const authService = {
     logout: async (): Promise<Response> => {        
         try {
             const response = await api.post<Response>('/logout');
-            console.log('Response:', response);
             if (response.data.status === true) {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
@@ -109,7 +108,6 @@ const authService = {
             showSuccessToast(response.data.message);
             return response.data;
         } catch (error: any) {
-            console.error('Logout failed:', error);
             if (error.response) {
                 console.error('Status:', error.response.status);
                 console.error('Data:', error.response.data);
@@ -127,11 +125,9 @@ const authService = {
         }
 
         try {       
-            console.log('Attempting to refresh token...');     
             const response = await api.post<AuthResponse>('/refresh', {}, {
                 headers: { Authorization: `Bearer ${refreshToken}` },
             });
-            console.log('Refresh response:', response);
 
             if (response.data.status === true) {
                 const { access_token, refresh_token } = response.data.data;
