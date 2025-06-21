@@ -5,6 +5,7 @@ import PaymentPage from "../pages/register/PaymentPage";
 import SignUpPage from "../pages/register/SignUpPage";
 import WelcomePage from "../pages/register/WelcomePage";
 import GuestRoute from "../../../routes/GuestRoute";
+import SubscriptionExtension from "../pages/subscription/SubscriptionExtension";
 
 const AuthRoute = [
     {
@@ -16,6 +17,7 @@ const AuthRoute = [
             { path: '/signup/password', element: <ChoosePlanPage /> },
             { path: '/signup/plan', element: <ChoosePlanPage /> },
             { path: '/signup/payment', element: <PaymentPage /> },
+            { path: '/subscription-extension', element: <SubscriptionExtension /> },
         ]
     }
 ]

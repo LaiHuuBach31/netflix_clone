@@ -27,6 +27,18 @@ export const fetchSubscriptions = createAsyncThunk<DataResponse, { page?: number
     }
 )
 
+export const fetchSubscriptionByUser = createAsyncThunk<SingleResponse, number, { rejectValue: ErrorResponse }>(
+    'subscription/fetchSubscriptionByUser',
+    async (userId: number, { rejectWithValue }) => {
+        try {
+            const response = await subscriptionService.getSubscriptionByUser(userId);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error || 'Failed to fetch subscription by user');
+        }
+    }
+)
+
 export const fetchSubscriptionById = createAsyncThunk<Subscription, number, { rejectValue: ErrorResponse }>(
     'subscription/fetchSubscriptionById',
     async (id: number, { rejectWithValue }) => {
@@ -68,7 +80,7 @@ export const deleteSubscription = createAsyncThunk<number, number, { rejectValue
         try {
             const response = await subscriptionService.deleteSubscription(id);
             console.log(response);
-            
+
             return id;
         } catch (error: any) {
             return rejectWithValue(error);
@@ -96,6 +108,20 @@ const subscriptionSlice = createSlice({
                 state.response = action.payload;
             })
             .addCase(fetchSubscriptions.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? null;
+            })
+
+            // fetch by user
+            .addCase(fetchSubscriptionByUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchSubscriptionByUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.selectedSubscription = action.payload.data;
+            })
+            .addCase(fetchSubscriptionByUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })

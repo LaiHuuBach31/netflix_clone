@@ -7,7 +7,10 @@ use App\Exports\UsersExport;
 use App\Imports\UsersImport;
 use App\Mapper\UserMapper;
 use App\Repositories\UserRepository;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 class UserService extends BaseService
 {
@@ -28,6 +31,22 @@ class UserService extends BaseService
     {
         $user = parent::findById($id);
         return UserMapper::fromModel($user);
+    }
+
+    public function findByEmail(string $email)
+    {
+        try {
+            $user = $this->repository->getUserByEmail($email);
+            if($user){
+                return UserMapper::fromModel($user);
+            } else{
+                throw new ResourceNotFoundException('Resource not found with ID: ' . $email);
+            }
+        } catch (ModelNotFoundException $e) {
+            throw new ResourceNotFoundException('Resource not found with ID: ' . $email);
+        } catch (\Exception $e) {
+            throw new Exception('Failed to find resource: ' . $e->getMessage());
+        }
     }
 
     public function createUser(array $data)

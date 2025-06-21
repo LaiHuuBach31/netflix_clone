@@ -25,6 +25,12 @@ class SubscriptionRepository extends BaseRepository
         return $query->paginate($perPage);
     }
 
+    public function getSubscriptionByUser(int $userId): ?Subscription
+    {
+        return $this->model->where('user_id', $userId)->latest()->where('status', 1)->first();
+        
+    }
+
     public function createOrUpdate(array $data): Subscription
     {
         return $this->model->updateOrCreate(
@@ -38,4 +44,5 @@ class SubscriptionRepository extends BaseRepository
             ]
         );
     }
+
 }

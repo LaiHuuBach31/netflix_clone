@@ -38,6 +38,10 @@ class UserRepository extends BaseRepository{
     }
 
     public function getDataExport() {
-        return $query = $this->model->get();
+        return $this->model->get();
     }
+
+    function getUserByEmail(string $email) {
+        return $this->model->where('email', $email)->first();
+    }   
 }

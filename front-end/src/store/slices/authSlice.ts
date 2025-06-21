@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import authService from "../../modules/auth/services/authService";
+import { ac } from "react-router/dist/development/route-data-5OzAzQtT";
+import subscriptionService from "../../modules/admin/services/subscriptionService";
+import { updateSubscription } from "../../modules/admin/store/subscriptionSlice";
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -13,6 +16,8 @@ interface AuthState {
     } | null;
     loading: boolean;
     error: ErrorResponse | null;
+    subscriptionExpiry: number | null;
+    subscriptionId: number | null;
 }
 
 interface LoginPayload {
@@ -43,7 +48,9 @@ const initialState: AuthState = {
     isAuthenticated: false,
     user: null,
     loading: false,
-    error: null
+    error: null,
+    subscriptionExpiry: null,
+    subscriptionId: null,
 };
 
 const isTokenExpired = (token: string): boolean => {
@@ -66,25 +73,60 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
         }
 
         const isExpired = isTokenExpired(accessToken);
+        console.log('isExpired:', isExpired);
 
         if (isExpired) {
             const response = await authService.refreshToken();
-            const { access_token, refresh_token, user } = response.data;
-            localStorage.setItem('access_token', access_token);
-            localStorage.setItem('refresh_token', refresh_token);
+            const responseData = response.data;
+            localStorage.setItem('access_token', responseData.access_token);
+            localStorage.setItem('refresh_token', responseData.refresh_token);
+
+            const userId = responseData.user?.id;
+            const subscriptionResponse = await subscriptionService.getSubscriptionByUser(Number(userId));
+            const subscription = subscriptionResponse.data;
+            console.log('subscription', subscription);
+            console.log('subscription end date:', subscription.end_date);
+
+            if (!subscription || !subscription.end_date) {
+                throw new Error('No active subscription found');
+            }
+
+            const endDate = new Date(subscription.end_date).getTime();
+            
             return {
-                user,
-                accessToken: access_token,
-                refreshToken: refresh_token
+                user: responseData.user,
+                accessToken: responseData.access_token || accessToken,
+                refreshToken: responseData.refresh_token || refreshToken,
+                subscriptionExpiry: endDate,
+                subscriptionId: subscription.id,
             };
         } else {
             const response = await authService.getUserInfo();
+            const responseData = response.data;
+
+            const userId = responseData.id;
+            const subscriptionResponse = await subscriptionService.getSubscriptionByUser(userId);
+            const subscription = subscriptionResponse.data;
+            console.log('subscription-else', subscription);
+            console.log('subscription end date:', subscription.end_date);
+
+            if (!subscription || !subscription.end_date) {
+                throw new Error('No active subscription found');
+            }
+
+            const endDate = new Date(subscription.end_date).getTime();
+
             return {
-                user: response.data,
-                accessToken,
-                refreshToken
+                user: responseData,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                subscriptionExpiry: endDate,
+                subscriptionId: subscription.id,
             };
         }
+
+        
+
     } catch (error: any) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
@@ -201,11 +243,12 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: initialState,
     reducers: {
-        loginSuccess(state, action: PayloadAction<{ user: AuthState['user'], accessToken: string, refreshToken: string }>) {
+        loginSuccess(state, action: PayloadAction<{ user: AuthState['user'], accessToken: string, refreshToken: string, subscriptionExpiry?: number }>) {
             state.isAuthenticated = true;
             state.user = action.payload.user;
             state.loading = false;
             state.error = null;
+            state.subscriptionExpiry = action.payload.subscriptionExpiry || null;
             localStorage.setItem('access_token', action.payload.accessToken);
             localStorage.setItem('refresh_token', action.payload.refreshToken);
         },
@@ -221,14 +264,16 @@ const authSlice = createSlice({
                 state.user = action.payload.user || null;
                 state.loading = false;
                 state.error = null;
-                localStorage.setItem('access_token', action.payload.accessToken);
-                localStorage.setItem('refresh_token', action.payload.refreshToken);
+                state.subscriptionExpiry = action.payload.subscriptionExpiry || null;
+                state.subscriptionId = action.payload.subscriptionId || null;
             })
             .addCase(checkAuth.rejected, (state, action) => {
                 state.isAuthenticated = false;
                 state.user = null;
                 state.loading = false;
                 state.error = action.payload as ErrorResponse;
+                state.subscriptionExpiry = null;
+                state.subscriptionId = null;
             })
             .addCase(refreshAccessToken.pending, (state) => {
                 state.loading = false;
@@ -242,7 +287,7 @@ const authSlice = createSlice({
                 localStorage.setItem('access_token', action.payload.accessToken);
                 localStorage.setItem('refresh_token', action.payload.refreshToken);
             })
-            .addCase(refreshAccessToken.rejected, (state, action) => {                
+            .addCase(refreshAccessToken.rejected, (state, action) => {
                 state.isAuthenticated = false;
                 state.user = null;
                 state.loading = false;

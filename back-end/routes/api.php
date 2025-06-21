@@ -44,6 +44,7 @@ Route::group([
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user', [AuthController::class, 'getUser'])->middleware('auth:api');
 
+    Route::get('/users/{email}', [UserController::class, 'findUserByEmail']);
     Route::group(['prefix' => 'users', 'middleware' => ['auth:api']], function () {
         Route::get('/', [UserController::class, 'index'])->middleware('check.permission:get_users');
         Route::get('/export', [UserController::class, 'export'])->middleware('check.permission:export_user');
@@ -109,7 +110,7 @@ Route::group([
         Route::delete('/{id}', [MovieController::class, 'destroy'])->middleware('check.permission:delete_movie');
     });
 
-     Route::group(['prefix' => 'episodes', 'middleware' => ['auth:api']], function () {
+    Route::group(['prefix' => 'episodes', 'middleware' => ['auth:api']], function () {
         Route::get('/', [EpisodesController::class, 'index'])->middleware('check.permission:get_episodes');
         Route::get('/{id}', [EpisodesController::class, 'show'])->middleware('check.permission:show_episode');
         Route::post('/', [EpisodesController::class, 'store'])->middleware('check.permission:create_episode');
@@ -126,10 +127,11 @@ Route::group([
     });
 
     Route::post('/subscriptions', [SubscriptionController::class, 'store']);
+    Route::put('/subscriptions/{id}', [SubscriptionController::class, 'update']);
     Route::group(['prefix' => 'subscriptions', 'middleware' => ['auth:api']], function () {
         Route::get('/', [SubscriptionController::class, 'index'])->middleware('check.permission:get_subscriptions');
+        Route::get('/user/{user_id}', [SubscriptionController::class, 'getSubscriptionByUser']);
         Route::get('/{id}', [SubscriptionController::class, 'show'])->middleware('check.permission:show_subscription');
-        Route::put('/{id}', [SubscriptionController::class, 'update'])->middleware('check.permission:update_subscription');
         Route::delete('/{id}', [SubscriptionController::class, 'destroy'])->middleware('check.permission:delete_subscription');
     });
 

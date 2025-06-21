@@ -8,7 +8,7 @@ export interface User {
     avatar: string,
     status: boolean,
     roles: Role[];
-    created_at? : string;
+    created_at?: string;
 }
 
 export interface Role {
@@ -101,6 +101,15 @@ const userService = {
             return response.data;
         } catch (error: any) {
             throw error.response?.data as ErrorResponse || 'Failed to get user by id';
+        }
+    },
+
+    getUserByEmail: async (email: string): Promise<SingleResponse> => {
+        try {
+            const response = await api.get<SingleResponse>(`/users/${email}`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data as ErrorResponse || 'Failed to get user by email';
         }
     },
 

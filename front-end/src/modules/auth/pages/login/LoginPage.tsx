@@ -5,7 +5,7 @@ import './loginPage.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { showErrorToast, showSuccessToast } from '../../../../utils/toast';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginAsync } from '../../../../store/slices/authSlice';
+import { checkAuth, loginAsync } from '../../../../store/slices/authSlice';
 import { AppDispatch, RootState } from '../../../../store';
 
 const LoginPage: React.FC = () => {
@@ -26,6 +26,7 @@ const LoginPage: React.FC = () => {
       } else {
         navigate("/");
       }
+      await dispatch(checkAuth());
       showSuccessToast("Login successful");
     } catch (error: any) {
       const errorDetails = error.errors ? Object.values(error.errors).flat() : [];

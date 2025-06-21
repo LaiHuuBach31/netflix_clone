@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\DTOs\SubscriptionDTO;
 use App\Mapper\SubscriptionMapper;
+use App\Models\Subscription;
 use App\Repositories\PlanRepository;
 use App\Repositories\SubscriptionRepository;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 
 class SubscriptionService extends BaseService
@@ -28,10 +30,15 @@ class SubscriptionService extends BaseService
         return $Subscriptions;
     }
 
+    public function getSubscriptionByUser(int $userId)
+    {
+        $subscriptions = $this->repository->getSubscriptionByUser($userId);
+        return SubscriptionMapper::fromModel($subscriptions);
+    }
+
     public function findById(int $id)
     {
         $subscription = parent::findById($id);
-        logger($subscription);
         return SubscriptionMapper::fromModel($subscription);
     }
 
@@ -45,8 +52,22 @@ class SubscriptionService extends BaseService
 
     public function updateSubscription(int $id, array $data)
     {
-        $this->validateDuration($data);
-        $dto = new SubscriptionDTO($data, true);
+        $subscription = Subscription::find($id);
+
+        if (!$subscription) {
+            throw new ModelNotFoundException('Subscription not found with ID: ' . $id);
+        }
+
+        $mergedData = [
+            'id' => $id,
+            'user_id' => $data['user_id'] ?? $subscription->user_id,
+            'plan_id' => $data['plan_id'] ?? $subscription->plan_id,
+            'start_date' => $data['start_date'] ?? $subscription->start_date,
+            'end_date' => $data['end_date'] ?? $subscription->end_date,
+            'status' => $data['status'] ?? $subscription->status,
+        ];
+
+        $dto = new SubscriptionDTO($mergedData, true);
         $updated = parent::update($id, $dto);
         return SubscriptionMapper::fromModel($updated);
     }
@@ -61,7 +82,7 @@ class SubscriptionService extends BaseService
         $durationDays = $plan->duration_days;
 
         $diffDays = $startDate->diffInDays($endDate);
-      
+
         if ($diffDays != $durationDays) {
             throw new ValidationException(null, response()->json([
                 'errors' => [

@@ -30,6 +30,12 @@ class UserController extends BaseController
         return $this->handleShow($this->userService, $id);
     }
 
+    public function findUserByEmail(string $email)
+    {
+        $user = $this->userService->findByEmail($email);
+        return $this->okResponse($user, 'get user successfully');
+    }
+
     public function store(Request $request)
     {
         $data = [

@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Services\SubscriptionService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class SubscriptionController extends BaseController
 {
     protected $subscriptionService;
+    protected $userService;
 
-    public function __construct(SubscriptionService $subscriptionService)
-    {
+    public function __construct(
+        SubscriptionService $subscriptionService,
+        UserService $userService,
+    ) {
         $this->subscriptionService = $subscriptionService;
+        $this->userService = $userService;
     }
 
     public function index(Request $request)
@@ -22,6 +27,15 @@ class SubscriptionController extends BaseController
         return $this->handleIndex($this->subscriptionService, 'name', $search, $perPage);
     }
 
+    public function getSubscriptionByUser($user_id)
+    {
+        $subscription = $this->subscriptionService->getSubscriptionByUser($user_id);
+        if ($subscription) {
+            return $this->okResponse($subscription, 'Subscription retrieved successfully');
+        }
+        return $this->notFoundResponse('No subscription found for this user');
+    }
+
     public function show(int $id)
     {
         return $this->handleShow($this->subscriptionService, $id);
@@ -29,13 +43,24 @@ class SubscriptionController extends BaseController
 
     public function store(Request $request)
     {
-        $data = [
-            "user_id" => $request->user_id,
-            "plan_id" => $request->plan_id ,
-            "start_date" => $request->start_date ?? now()->toDateString(),
-            "end_date" => $request->end_date,
-            "status" => $request->status ?? true,
-        ];
+        if ($request->email) {
+            $user = $this->userService->findByEmail($request->email);
+            $data = [
+                "user_id" => $user->id,
+                "plan_id" => $request->plan_id,
+                "start_date" => $request->start_date ?? now()->toDateString(),
+                "end_date" => $request->end_date,
+                "status" => $request->status ?? true,
+            ];
+        } else {
+            $data = [
+                "user_id" => $request->user_id,
+                "plan_id" => $request->plan_id,
+                "start_date" => $request->start_date ?? now()->toDateString(),
+                "end_date" => $request->end_date,
+                "status" => $request->status ?? true,
+            ];
+        }
 
         try {
             $subscription = $this->subscriptionService->createSubscription($data);
@@ -60,5 +85,4 @@ class SubscriptionController extends BaseController
     {
         return $this->handleDelete($this->subscriptionService, $id, 'Subscription');
     }
-
 }

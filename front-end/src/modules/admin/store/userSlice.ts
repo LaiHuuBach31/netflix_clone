@@ -6,7 +6,7 @@ interface UserState {
     loading: boolean;
     error: ErrorResponse | null;
     selectedUser: User | null;
-    importErrors: any[] | null; 
+    importErrors: any[] | null;
 }
 
 const initialState: UserState = {
@@ -47,9 +47,9 @@ export const importUsers = createAsyncThunk<ImportResponse, File, { rejectValue:
         try {
             const response = await userService.importUser(file);
             console.log('res', response);
-            
+
             return response;
-        } catch (error:any) {
+        } catch (error: any) {
             return rejectWithValue(error || 'Failed to import users');
         }
     }
@@ -63,6 +63,17 @@ export const fetchUserById = createAsyncThunk<User, number, { rejectValue: Error
             return response.data;
         } catch (error: any) {
             return rejectWithValue(error || 'Failed to fetch user by id');
+        }
+    })
+
+export const fetchUserByEmail = createAsyncThunk<User, string, { rejectValue: ErrorResponse }>(
+    'user/fetchUserByEmail',
+    async (email: string, { rejectWithValue }) => {
+        try {
+            const response = await userService.getUserByEmail(email);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error || 'Failed to fetch user by email');
         }
     })
 
@@ -110,7 +121,7 @@ const userSlice = createSlice({
             state.selectedUser = action.payload;
         },
         clearImportErrors(state) {
-            state.importErrors = null; 
+            state.importErrors = null;
         },
     },
     extraReducers: (builder) => {
@@ -139,6 +150,20 @@ const userSlice = createSlice({
                 state.selectedUser = action.payload;
             })
             .addCase(fetchUserById.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? null;
+            })
+
+            // fetch by email
+            .addCase(fetchUserByEmail.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchUserByEmail.fulfilled, (state, action) => {
+                state.loading = false;
+                state.selectedUser = action.payload;
+            })
+            .addCase(fetchUserByEmail.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? null;
             })
@@ -215,9 +240,9 @@ const userSlice = createSlice({
             })
             .addCase(importUsers.fulfilled, (state, action) => {
                 state.loading = false;
-                
+
                 if (action.payload.status === false && action.payload.errors) {
-                    state.importErrors = action.payload.errors; 
+                    state.importErrors = action.payload.errors;
                 } else if (action.payload.status === true) {
                     state.importErrors = null;
                 }
@@ -229,5 +254,5 @@ const userSlice = createSlice({
     }
 })
 
-export const { setSelectedUser, clearImportErrors} = userSlice.actions;
+export const { setSelectedUser, clearImportErrors } = userSlice.actions;
 export default userSlice.reducer;

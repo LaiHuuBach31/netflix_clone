@@ -53,10 +53,10 @@ const App: React.FC = () => {
     }
   }, [dispatch]);
 
-  // if (loading) {
-  //   showInfoToast('Loading, please wait...');
-  //   return null;
-  // }
+  if (loading) {
+    showInfoToast('Loading, please wait...');
+    return null;
+  }
 
   return (
     <div className="App">

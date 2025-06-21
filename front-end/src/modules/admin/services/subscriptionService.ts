@@ -82,6 +82,16 @@ const subscriptionService = {
         }
     },
 
+    getSubscriptionByUser: async (user_id: number): Promise<SingleResponse> => {
+        try {   
+            const response = await api.get<SingleResponse>(`/subscriptions/user/${user_id}`);
+            return response.data;
+        }
+        catch (error: any) {
+            throw error.response?.data as ErrorResponse || 'Failed to get subscription by user';
+        }   
+    },
+
     getSubscriptionById: async (id: number): Promise<SingleResponse> => {
         try {
             const response = await api.get<SingleResponse>(`/subscriptions/${id}`);

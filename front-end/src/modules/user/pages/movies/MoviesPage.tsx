@@ -20,8 +20,6 @@ const MoviesPage: React.FC = () => {
     );
     const { loading: moviesLoading } = useSelector((state: RootState) => state.movie);
 
-    console.log(oResponse);
-
     const genres = (oResponse?.data?.items || []) as GenreItem[];
     const moviesByGenre = oMovieByGenerResponse || {};
 
