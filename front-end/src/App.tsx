@@ -42,7 +42,6 @@ const App: React.FC = () => {
       const decoded = jwtDecode<JwtPayload>(accessToken);
       const expireAt = decoded.exp! * 1000;
       const timeToRefresh = expireAt - Date.now() - 5 * 60 * 1000;
-      console.log('timeToRefresh', timeToRefresh);
 
       if (timeToRefresh > 0) {
         const timeoutId = setTimeout(() => {

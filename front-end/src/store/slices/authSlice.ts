@@ -74,12 +74,10 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
         }
 
         const isExpired = isTokenExpired(accessToken);
-        console.log('isExpired:', isExpired);
 
         if (isExpired) {
             const response = await authService.refreshToken();
             const responseData = response.data;
-            console.log('response refresh', responseData);
             
             localStorage.setItem('access_token', responseData.access_token);
             localStorage.setItem('refresh_token', responseData.refresh_token);

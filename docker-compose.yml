@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: front-end/Dockerfile
+    image: netflix-frontend
+    ports:
+      - "80:80"
+    networks:
+      - netflix-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: netflix-backend
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db
+    networks:
+      - netflix-network
+    volumes:
+      - ./backend:/var/www
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: netflex
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_PASSWORD: 
+      MYSQL_USER: root
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - netflix-network
+
+volumes:
+  dbdata:
+
+networks:
+  netflix-network:
+    driver: bridge
