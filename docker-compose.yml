@@ -3,8 +3,8 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: .
-      dockerfile: front-end/Dockerfile
+      context: ./front-end
+      dockerfile: Dockerfile
     image: netflix-frontend
     ports:
       - "80:80"
@@ -13,29 +13,46 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./back-end
+      dockerfile: Dockerfile
     image: netflix-backend
     ports:
       - "9000:9000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    volumes:
+      - ./back-end:/var/www
     networks:
       - netflix-network
-    volumes:
-      - ./backend:/var/www
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: http://160.250.180.14
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: netflex
+      DB_USERNAME: bachlai
+      DB_PASSWORD: 91e2iPa[Fw]C6aWS
+
 
   db:
     image: mysql:8.0
+    restart: always
     environment:
+      MYSQL_ROOT_PASSWORD: aiJy[LzgqZzEy0gX
       MYSQL_DATABASE: netflex
-      MYSQL_ROOT_PASSWORD: 
-      MYSQL_PASSWORD: 
-      MYSQL_USER: root
+      MYSQL_USER: bachlai
+      MYSQL_PASSWORD: 91e2iPa[Fw]C6aWS
     volumes:
       - dbdata:/var/lib/mysql
     networks:
       - netflix-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   dbdata:

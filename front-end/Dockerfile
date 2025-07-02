@@ -1,9 +1,9 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install && npm cache clean --force
 COPY . .
-RUN npm run build
+RUN npm run build || exit 1
 
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html

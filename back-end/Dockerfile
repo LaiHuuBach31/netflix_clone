@@ -1,13 +1,20 @@
-FROM php:8.1-fpm
-RUN apt-get update && apt-get install -y libpng-dev libonig-dev libxml2-dev zip unzip git curl
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath
+FROM php:8.3-fpm-alpine
+
+RUN apk add --no-cache \
+    bash curl git unzip libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev \
+    libxml2-dev oniguruma-dev zlib-dev libjpeg-turbo libpng libwebp-dev libxpm-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 WORKDIR /var/www
-COPY backend/ .
-RUN composer install --no-scripts --no-interaction
-RUN chmod -R 775 storage bootstrap/cache
-RUN chown -R www-data:www-data /var/www
-COPY backend/.env.example .env
-RUN php artisan key:generate
+COPY . .
+
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
+RUN chmod -R 775 storage bootstrap/cache && \
+    chown -R www-data:www-data /var/www
+
 EXPOSE 9000
 CMD ["php-fpm"]
