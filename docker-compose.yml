@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile
     image: netflix-backend
     ports:
-      - "9000:9000"
+      - "8000:9000"
     depends_on:
       db:
         condition: service_healthy
@@ -26,9 +26,6 @@ services:
     networks:
       - netflix-network
     environment:
-      APP_ENV: production
-      APP_DEBUG: false
-      APP_URL: http://160.250.180.14
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: netflex
@@ -40,10 +37,10 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: aiJy[LzgqZzEy0gX
+      MYSQL_ROOT_PASSWORD: 12345678
       MYSQL_DATABASE: netflex
       MYSQL_USER: bachlai
-      MYSQL_PASSWORD: 91e2iPa[Fw]C6aWS
+      MYSQL_PASSWORD: 12345678
     volumes:
       - dbdata:/var/lib/mysql
     networks:

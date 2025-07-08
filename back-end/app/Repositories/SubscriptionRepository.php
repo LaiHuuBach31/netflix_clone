@@ -21,7 +21,7 @@ class SubscriptionRepository extends BaseRepository
         }
 
         $query->with('user', 'plan');
-        
+
         return $query->paginate($perPage);
     }
 

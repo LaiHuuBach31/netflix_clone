@@ -15,10 +15,17 @@ const ProtectedRoute: React.FC = () => {
   const access_token = localStorage.getItem('access_token');
   const refresh_token = localStorage.getItem('refresh_token');
   const user_localStorage = localStorage.getItem('user');
+  console.log('user_localStorage', user_localStorage);
+  
 
   const isAdminRoute = location.pathname.startsWith('/admin');
   const userCurent = JSON.parse(user_localStorage || '{}');
   const hasAdminRole = userCurent?.roles?.includes('Admin') || false;
+
+  console.log(!loading && isAuthenticated && !hasAdminRole && subscriptionExpiry && currentTime > subscriptionExpiry);
+  console.log('hasAdminRole', hasAdminRole);
+  console.log(userCurent);
+  
 
   useEffect(() => {
     if (!access_token && !refresh_token) {
@@ -33,6 +40,7 @@ const ProtectedRoute: React.FC = () => {
     }
 
     if (!loading && isAuthenticated && !hasAdminRole && subscriptionExpiry && currentTime > subscriptionExpiry) {
+            
       if (subscriptionId) {
         dispatch(updateSubscription({ id: subscriptionId, data: { status: false } }));
       }
@@ -42,6 +50,7 @@ const ProtectedRoute: React.FC = () => {
       showWarningToast('Your subscription has expired. Please purchase a new plan.');
       navigate('/subscription-extension', { replace: true, state: { from: location } });
     }
+
   }, [dispatch, loading, isAuthenticated, hasAdminRole, subscriptionExpiry, currentTime, navigate, access_token, refresh_token, isAdminRoute, subscriptionId, location]);
 
   if (!access_token && !refresh_token) return null;

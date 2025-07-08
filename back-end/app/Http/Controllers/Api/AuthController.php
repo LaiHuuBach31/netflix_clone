@@ -178,6 +178,13 @@ class AuthController extends Controller
                 return $this->unauthorizedResponse([], 'Invalid or expired refresh token');
             }
 
+            $maxSessionDays = 30;
+            $originCreatedAt = $tokenRecord->origin_created_at ?? $tokenRecord->created_at;
+
+            if (now()->diffInDays($originCreatedAt) >= $maxSessionDays) {
+                return $this->unauthorizedResponse([], 'Login session expired. Please login again.');
+            }
+
             $user = User::find($tokenRecord->user_id);
             if (!$user) {
                 return $this->unauthorizedResponse([], 'User not found');
@@ -191,6 +198,7 @@ class AuthController extends Controller
                 'token' => $newRefreshToken,
                 'user_id' => $user->id,
                 'expires_at' => now()->addDays(7),
+                'origin_created_at' => $originCreatedAt,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

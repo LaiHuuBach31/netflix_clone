@@ -68,61 +68,84 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
     try {
         const accessToken = localStorage.getItem('access_token');
         const refreshToken = localStorage.getItem('refresh_token');
+        const userLocal = localStorage.getItem('user');
 
         if (!accessToken || !refreshToken) {
             throw new Error('No token found');
         }
 
         const isExpired = isTokenExpired(accessToken);
+        const userData = JSON.parse(userLocal || '{}');
+        const isAdmin = userData?.roles?.includes('Admin') || false;
+        // console.log(isAdmin);
+
 
         if (isExpired) {
             const response = await authService.refreshToken();
             const responseData = response.data;
-            
+
             localStorage.setItem('access_token', responseData.access_token);
             localStorage.setItem('refresh_token', responseData.refresh_token);
 
             const userId = responseData.user?.id;
-            const subscriptionResponse = await subscriptionService.getSubscriptionByUser(Number(userId));
-            const subscription = subscriptionResponse.data;
+            if (!isAdmin) {
+                const subscriptionResponse = await subscriptionService.getSubscriptionByUser(Number(userId));
+                const subscription = subscriptionResponse.data;
 
-            if (!subscription || !subscription.end_date) {
-                throw new Error('No active subscription found');
+                if (!subscription || !subscription.end_date) {
+                    throw new Error('No active subscription found');
+                }
+
+                const endDate = new Date(subscription.end_date).getTime();
+
+                return {
+                    user: responseData.user,
+                    accessToken: responseData.access_token || accessToken,
+                    refreshToken: responseData.refresh_token || refreshToken,
+                    subscriptionExpiry: endDate,
+                    subscriptionId: subscription.id,
+                };
+            } else {
+                return {
+                    user: responseData.user,
+                    accessToken: responseData.access_token || accessToken,
+                    refreshToken: responseData.refresh_token || refreshToken,
+                };
             }
 
-            const endDate = new Date(subscription.end_date).getTime();
-            
-            return {
-                user: responseData.user,
-                accessToken: responseData.access_token || accessToken,
-                refreshToken: responseData.refresh_token || refreshToken,
-                subscriptionExpiry: endDate,
-                subscriptionId: subscription.id,
-            };
         } else {
             const response = await authService.getUserInfo();
             const responseData = response.data;
 
-            const userId = responseData.id;
-            const subscriptionResponse = await subscriptionService.getSubscriptionByUser(userId);
-            const subscription = subscriptionResponse.data;
-        
-            if (!subscription || !subscription.end_date) {
-                throw new Error('No active subscription found');
+            if (!isAdmin) {
+                const userId = responseData.id;
+                const subscriptionResponse = await subscriptionService.getSubscriptionByUser(userId);
+                const subscription = subscriptionResponse.data;
+
+                if (!subscription || !subscription.end_date) {
+                    throw new Error('No active subscription found');
+                }
+
+                const endDate = new Date(subscription.end_date).getTime();
+
+                return {
+                    user: responseData,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                    subscriptionExpiry: endDate,
+                    subscriptionId: subscription.id,
+                };
+            } else {
+                return {
+                    user: responseData,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                };
             }
 
-            const endDate = new Date(subscription.end_date).getTime();
-
-            return {
-                user: responseData,
-                accessToken: accessToken,
-                refreshToken: refreshToken,
-                subscriptionExpiry: endDate,
-                subscriptionId: subscription.id,
-            };
         }
 
-        
+
 
     } catch (error: any) {
         localStorage.removeItem('access_token');
