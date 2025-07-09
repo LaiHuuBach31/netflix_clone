@@ -56,14 +56,7 @@ class AuthController extends Controller
                 return $this->errorResponse([], 'Failed to generate token', 500);
             }
 
-            $refreshToken = bin2hex(random_bytes(40));
-            DB::table('refresh_tokens')->insert([
-                'token' => $refreshToken,
-                'user_id' => $user->id,
-                'expires_at' => now()->addDays(7),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $refreshToken = generateRefreshToken($user->id);
 
             $roles = $user->roles->pluck('name');
 
@@ -111,20 +104,12 @@ class AuthController extends Controller
             }
 
             $token = Auth::attempt($data);
-            $refreshToken = bin2hex(random_bytes(40));
 
             if (!$token) {
                 return $this->unauthorizedResponse([], 'Invalid credentials');
             }
 
-            $refreshToken = bin2hex(random_bytes(40));
-            DB::table('refresh_tokens')->insert([
-                'token' => $refreshToken,
-                'user_id' => $user->id,
-                'expires_at' => now()->addDays(7),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $refreshToken = generateRefreshToken($user->id);
 
             $user = auth()->user();
             $roles = $user->roles->pluck('name');
@@ -165,7 +150,7 @@ class AuthController extends Controller
     {
         try {
             $refreshToken = str_replace('Bearer ', '', (string) $request->header('Authorization', ''));
-            
+
             if (!$refreshToken) {
                 return $this->unauthorizedResponse([], 'Refresh token is missing');
             }
@@ -192,16 +177,8 @@ class AuthController extends Controller
 
             $newToken = Auth::login($user);
 
-            $newRefreshToken = bin2hex(random_bytes(40));
             RefreshToken::where('token', $refreshToken)->delete();
-            DB::table('refresh_tokens')->insert([
-                'token' => $newRefreshToken,
-                'user_id' => $user->id,
-                'expires_at' => now()->addDays(7),
-                'origin_created_at' => $originCreatedAt,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $newRefreshToken = generateRefreshToken($user->id, $originCreatedAt);
 
             $user = auth()->user();
             $roles = $user->roles->pluck('name');
@@ -250,7 +227,6 @@ class AuthController extends Controller
 
     public function updateProfile(Request $request)
     {
-
         DB::beginTransaction();
         try {
             $user = Auth::user();
@@ -258,11 +234,7 @@ class AuthController extends Controller
                 return $this->unauthorizedResponse([], 'User not authenticated');
             }
 
-            if ($request->password) {
-                $password = $request->password;
-            } else {
-                $password = $user->password;
-            }
+            $password = $request->password ?: $user->password;
 
             $data = array_merge(
                 ['id' => $user->id],
@@ -345,14 +317,7 @@ class AuthController extends Controller
 
             DB::table('refresh_tokens')->where('user_id', $user->id)->delete();
             $newToken = Auth::login($user);
-            $newRefreshToken = bin2hex(random_bytes(40));
-            DB::table('refresh_tokens')->insert([
-                'token' => $newRefreshToken,
-                'user_id' => $user->id,
-                'expires_at' => now()->addDays(7),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $newRefreshToken = generateRefreshToken($user->id);
 
             DB::commit();
             return $this->successResponse([
