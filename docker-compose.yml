@@ -25,12 +25,8 @@ services:
       - ./back-end:/var/www
     networks:
       - netflix-network
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: netflex
-      DB_USERNAME: bachlai
-      DB_PASSWORD: 91e2iPa[Fw]C6aWS
+    env_file:
+      - .env
 
 
   db:
